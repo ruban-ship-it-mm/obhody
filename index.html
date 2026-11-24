@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e3a8a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Обходы">
+<link rel="apple-touch-icon" id="appIcon" href="">
+<script>
+/* Иконка для главного экрана: рисуется сразу при загрузке (PNG 180×180) */
+(function(){try{
+ var c=document.createElement('canvas');c.width=c.height=180;var x=c.getContext('2d');
+ var g=x.createLinearGradient(0,0,180,180);g.addColorStop(0,'#1e3a8a');g.addColorStop(1,'#2563eb');
+ x.fillStyle=g;x.fillRect(0,0,180,180);
+ x.strokeStyle='#fff';x.lineWidth=9;x.lineJoin='round';x.lineCap='round';
+ x.beginPath();x.moveTo(40,62);x.lineTo(66,62);x.lineTo(76,46);x.lineTo(104,46);x.lineTo(114,62);x.lineTo(140,62);
+ x.quadraticCurveTo(148,62,148,70);x.lineTo(148,126);x.quadraticCurveTo(148,134,140,134);x.lineTo(40,134);
+ x.quadraticCurveTo(32,134,32,126);x.lineTo(32,70);x.quadraticCurveTo(32,62,40,62);x.closePath();x.stroke();
+ x.beginPath();x.arc(90,97,22,0,Math.PI*2);x.stroke();
+ x.fillStyle='#ef4444';x.beginPath();x.arc(138,46,17,0,Math.PI*2);x.fill();
+ x.fillStyle='#fff';x.font='bold 24px Arial';x.textAlign='center';x.textBaseline='middle';x.fillText('!',138,47);
+ var u=c.toDataURL('image/png');document.getElementById('appIcon').href=u;
+ var l=document.createElement('link');l.rel='icon';l.href=u;document.head.appendChild(l);
+}catch(e){}})();
+</script>
+<title>Обходы производства</title>
+<style>
+:root{--pri:#2563eb;--pri2:#1e3a8a;--bg:#eef2f7;--card:#fff;--txt:#0f172a;--mut:#64748b;
+--red:#dc2626;--redbg:#fee2e2;--grn:#16a34a;--grnbg:#dcfce7;--amb:#d97706;--ambbg:#fef3c7;
+--line:#e2e8f0;--rad:18px;--sh:0 4px 18px rgba(15,23,42,.08)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;background:var(--bg);color:var(--txt);padding-bottom:120px}
+svg{display:block}
+header{position:sticky;top:0;z-index:5;background:linear-gradient(135deg,var(--pri2),var(--pri));color:#fff;
+padding:calc(14px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 14px calc(16px + env(safe-area-inset-left));display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(30,58,138,.3)}
+header h1{flex:1;margin:0;font-size:19px;font-weight:800}
+header small{display:block;font-weight:400;opacity:.8;font-size:12px;margin-top:2px}
+.hb{width:42px;height:42px;border-radius:12px;border:0;background:rgba(255,255,255,.16);color:#fff;display:grid;place-items:center;cursor:pointer;flex:none}
+.hb svg{width:22px;height:22px}
+main{max-width:760px;margin:auto;padding:16px}
+.btn{font:inherit;font-weight:600;border:0;border-radius:14px;padding:13px 16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+background:#fff;color:var(--txt);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn svg{width:20px;height:20px;flex:none}
+.btn.p{background:var(--pri);color:#fff;box-shadow:0 6px 16px rgba(37,99,235,.35)}
+.btn.g{background:var(--grn);color:#fff;box-shadow:0 6px 14px rgba(22,163,74,.3)}
+.btn.d{color:var(--red)}
+.btn.full{width:100%}
+.btn.big{padding:18px;font-size:17px;border-radius:16px}
+.btn.ib{padding:13px}
+.btn.sm{padding:10px 12px;font-size:14px;border-radius:12px}
+.btn:active{transform:scale(.98)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border-radius:var(--rad);padding:14px;box-shadow:var(--sh)}
+.stat b{font-size:28px;display:block;line-height:1.1}
+.stat span{font-size:12px;color:var(--mut)}
+.stat.a b{color:var(--amb)}.stat.r b{color:var(--red)}
+.sec{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);margin:24px 4px 10px}
+.card{background:var(--card);border-radius:var(--rad);box-shadow:var(--sh);padding:16px;margin-bottom:12px}
+.acard{display:flex;gap:14px;align-items:center;cursor:pointer}
+.acard .ic{width:54px;height:54px;border-radius:14px;background:#e0e7ff;color:var(--pri);display:grid;place-content:center;flex:none;font-weight:700;text-align:center;font-size:12px;line-height:1.1}
+.acard .ic b{font-size:20px;display:block}
+.acard .bd{flex:1;min-width:0}
+.t{font-weight:700}
+.chev{color:#cbd5e1}.chev svg{width:22px;height:22px}
+.mut{color:var(--mut);font-size:13px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#f1f5f9;color:var(--mut);white-space:nowrap}
+.chip svg{width:13px;height:13px}
+.chip.o{background:var(--redbg);color:var(--red)}.chip.ok{background:var(--grnbg);color:var(--grn)}.chip.a{background:var(--ambbg);color:var(--amb)}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.mini div{background:#f8fafc;border-radius:12px;padding:10px;text-align:center;font-size:12px;color:var(--mut)}
+.mini b{display:block;font-size:22px;color:var(--txt)}
+.empty{text-align:center;padding:40px 16px}
+.bigcam{width:136px;height:136px;border-radius:50%;border:0;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;display:grid;place-items:center;
+margin:0 auto 22px;cursor:pointer;animation:pulse 2.2s infinite}
+.bigcam svg{width:60px;height:60px}
+@keyframes pulse{0%,100%{box-shadow:0 14px 34px rgba(37,99,235,.45),0 0 0 8px rgba(37,99,235,.15)}50%{box-shadow:0 14px 34px rgba(37,99,235,.45),0 0 0 22px rgba(37,99,235,0)}}
+.empty .t{font-size:18px;margin-bottom:6px}
+.tabs{display:flex;background:#dfe5ee;border-radius:14px;padding:4px;margin:18px 0 6px}
+.tabs button{flex:1;border:0;background:none;padding:11px;border-radius:11px;font:inherit;font-weight:700;color:var(--mut);cursor:pointer}
+.tabs .on{background:#fff;color:var(--txt);box-shadow:0 2px 8px rgba(15,23,42,.1)}
+.icard{padding:0;overflow:hidden}
+.icard .ph{position:relative;height:230px;background:#e2e8f0;cursor:pointer}
+.icard .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.noph{height:100%;display:grid;place-items:center;color:#94a3b8}.noph svg{width:48px;height:48px}
+.num{position:absolute;top:12px;left:12px;background:rgba(15,23,42,.75);color:#fff;font-weight:800;border-radius:10px;padding:5px 11px;font-size:14px}
+.cnt{position:absolute;top:12px;right:12px;background:rgba(15,23,42,.75);color:#fff;border-radius:10px;padding:5px 9px;font-size:13px;font-weight:700;display:flex;gap:5px;align-items:center}
+.cnt svg{width:15px;height:15px}
+.st{position:absolute;bottom:12px;left:12px;display:flex;gap:6px}
+.st .chip{box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.icard .bd{padding:14px 16px 8px;cursor:pointer}
+.loc{display:flex;gap:6px;align-items:center;color:var(--pri);font-weight:700}
+.loc svg{width:18px;height:18px;flex:none}
+.cmt{margin:8px 0 12px;font-size:15px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.meta{display:flex;gap:6px;flex-wrap:wrap}
+.act{padding:8px 16px 16px}.act .btn{width:100%}
+.isdone .ph img{filter:saturate(.3);opacity:.85}
+/* итоги */
+.zr{padding:12px 0;border-bottom:1px solid var(--line)}.zr:first-child{padding-top:0}.zr:last-of-type{border-bottom:0}
+.zr-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.track{background:#e2e8f0;border-radius:6px;overflow:hidden;height:12px}
+.bar{display:flex;height:12px;border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%}
+.bar i.h{background:#dc2626}.bar i.m{background:#f59e0b}.bar i.d{background:#16a34a}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:12px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.ph-h{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+.av{width:46px;height:46px;border-radius:50%;background:#e0e7ff;color:var(--pri);display:grid;place-items:center;font-weight:800;flex:none}
+.pi{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.pi img,.pi .nf{width:54px;height:54px;border-radius:10px;object-fit:cover;flex:none;background:#e2e8f0}
+.pi .bd{flex:1;min-width:0}
+.pi .d{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--mut)}
+.pi.dn{opacity:.5}
+.fab{position:fixed;right:20px;bottom:calc(24px + env(safe-area-inset-bottom));width:74px;height:74px;border-radius:50%;border:0;
+background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;box-shadow:0 10px 28px rgba(37,99,235,.55);display:grid;place-items:center;z-index:6;cursor:pointer}
+.fab svg{width:34px;height:34px}
+.fab[hidden]{display:none}
+.ov{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);z-index:20;display:flex;align-items:flex-end;justify-content:center;animation:fd .2s}
+.sheet{background:#fff;width:100%;max-width:640px;max-height:96vh;overflow:auto;border-radius:24px 24px 0 0;padding:10px 18px 0;animation:up .25s ease}
+.handle{width:44px;height:5px;border-radius:3px;background:#cbd5e1;margin:0 auto 12px}
+@keyframes up{from{transform:translateY(40px);opacity:0}}@keyframes fd{from{opacity:0}}
+.sh-t{font-size:20px;font-weight:800}
+.step{display:flex;align-items:center;gap:10px;margin:20px 0 10px;font-weight:700;font-size:16px}
+.step i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--pri);color:#fff;display:grid;place-items:center;font-size:14px;flex:none}
+.mainph{position:relative;border-radius:16px;overflow:hidden;background:#0f172a}
+.mainph img{width:100%;max-height:300px;object-fit:contain;display:block;cursor:pointer}
+.markbtn{position:absolute;right:10px;bottom:10px;border:0;background:rgba(220,38,38,.95);color:#fff;font:inherit;font-weight:700;font-size:14px;padding:10px 14px;border-radius:12px;display:flex;gap:6px;align-items:center;box-shadow:0 4px 12px rgba(0,0,0,.35);cursor:pointer}
+.markbtn svg{width:18px;height:18px}
+.phempty{width:100%;height:180px;border:2px dashed #93c5fd;border-radius:16px;background:#eff6ff;color:var(--pri);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:700;cursor:pointer}
+.phempty svg{width:46px;height:46px}
+.thumbs{display:flex;gap:10px;margin-top:10px;overflow-x:auto;padding:8px 4px}
+.th{position:relative;flex:none;width:64px;height:64px;border-radius:12px;padding:0}
+.th img{width:100%;height:100%;object-fit:cover;border-radius:12px;cursor:pointer;display:block}
+.th.on img{outline:3px solid var(--pri);outline-offset:2px}
+.th b{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;font-size:15px;line-height:22px;text-align:center;cursor:pointer}
+.th.add{border:2px dashed #cbd5e1;background:#f8fafc;color:var(--mut);display:grid;place-items:center;cursor:pointer}
+.th.add svg{width:24px;height:24px}
+.zones{display:flex;gap:8px;flex-wrap:wrap}
+.zc{padding:10px 14px;border-radius:12px;background:#f1f5f9;border:2px solid transparent;font:inherit;font-weight:600;font-size:14px;color:var(--txt);cursor:pointer}
+.zc.on{background:#e0e7ff;border-color:var(--pri);color:var(--pri2)}
+input,select,textarea{width:100%;font:inherit;font-size:16px;padding:13px 14px;border-radius:14px;border:1.5px solid var(--line);background:#f8fafc;color:var(--txt);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--pri);background:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.12)}
+textarea{min-height:100px;resize:vertical}
+.lb{font-size:12px;color:var(--mut);margin:0 0 5px 4px;font-weight:700}
+.fld{margin-top:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+details{margin-top:16px;background:#f8fafc;border-radius:14px;padding:12px 14px}
+summary{font-weight:600;color:var(--mut);cursor:pointer}
+details[open] summary{margin-bottom:12px}
+details input,details select{background:#fff}
+.sfoot{position:sticky;bottom:0;background:#fff;display:flex;gap:8px;padding:14px 0 calc(14px + env(safe-area-inset-bottom));margin-top:18px;border-top:1px solid var(--line)}
+/* разметка фото */
+#ann{position:fixed;inset:0;background:#0b1220;z-index:40;display:flex;flex-direction:column;color:#fff}
+.an-top{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 12px 10px}
+.an-t{flex:1;font-weight:700}
+.an-ok{border:0;background:var(--pri);color:#fff;font:inherit;font-weight:700;border-radius:12px;padding:11px 14px;display:flex;gap:6px;align-items:center;cursor:pointer}
+.an-ok svg{width:18px;height:18px}
+.an-wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:6px}
+#anc{touch-action:none;border-radius:8px;box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+.an-bot{padding:10px 12px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px;align-items:center}
+.an-tools{display:flex;gap:8px}
+.an-tools button{border:0;background:rgba(255,255,255,.1);color:#fff;border-radius:14px;padding:10px 12px;font:inherit;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;min-width:80px;cursor:pointer}
+.an-tools button svg{width:24px;height:24px}
+.an-tools .on{background:#fff;color:#0b1220}
+.an-cols{display:flex;gap:14px}
+.an-cols button{width:34px;height:34px;border-radius:50%;border:3px solid rgba(255,255,255,.25);cursor:pointer}
+.an-cols .on{border-color:#fff;transform:scale(1.18)}
+.an-hint{font-size:12px;opacity:.6;text-align:center}
+#toast{position:fixed;left:50%;bottom:120px;transform:translate(-50%,20px);background:#0f172a;color:#fff;padding:11px 18px;border-radius:12px;font-weight:600;opacity:0;transition:.25s;z-index:50;pointer-events:none}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#print{display:none}
+@media print{
+ body{background:#fff;padding:0}
+ header,main,.ov,.fab,#toast,#ann{display:none!important}
+ #print{display:block}
+}
+@page{size:A4;margin:12mm}
+.rep{font-size:12px;color:#0f172a;font-family:Arial,Helvetica,sans-serif}
+.rep *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rep .rh{display:flex;justify-content:space-between;align-items:center;background:#1e3a8a;color:#fff;border-radius:10px;padding:14px 18px}
+.rep .rt{font-size:20px;font-weight:800}
+.rep .rn{font-size:28px;font-weight:800;text-align:center;line-height:1}.rep .rn span{display:block;font-size:10px;font-weight:400;margin-top:2px}
+.rep table{border-collapse:collapse;margin:10px 0}
+.rep .info td{padding:3px 14px 3px 0;font-size:13px}
+.rep .f{break-inside:avoid;border:1px solid #cbd5e1;border-radius:10px;overflow:hidden;margin:14px 0}
+.rep .fh{display:flex;justify-content:space-between;align-items:center;background:#f1f5f9;padding:7px 12px;font-weight:800;font-size:15px}
+.rep .s{font-size:10px;font-weight:800;padding:3px 8px;border-radius:7px;white-space:nowrap;display:inline-block}
+.rep .s.o{background:#fee2e2;color:#b91c1c}.rep .s.ok{background:#dcfce7;color:#15803d}.rep .s.a{background:#fef3c7;color:#b45309}
+.rep .s.hi{background:#b91c1c;color:#fff;margin-right:6px}
+.rep .rph{padding:8px;text-align:center}
+.rep .rph img{max-width:100%;max-height:10cm;border-radius:6px}
+.rep .rph.m{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.rep .rph.m img{width:100%;height:6.5cm;object-fit:contain;background:#f8fafc}
+.rep .fl{padding:7px 12px;border-top:1px solid #e2e8f0}
+.rep .lb{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin:0 0 2px;font-weight:700}
+.rep .lv{font-size:14px;font-weight:700}
+.rep .lv.c{font-weight:400;line-height:1.4}
+.rep .fm{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-top:1px solid #e2e8f0}
+.rep .fm>div{padding:6px 12px;border-right:1px solid #e2e8f0;font-size:12px;font-weight:700}
+.rep .fm>div:last-child{border-right:0}
+.rep .sp{break-before:page}
+.rep h3{font-size:15px;margin:18px 0 6px;color:#1e3a8a;break-after:avoid}
+.rep .zt{width:100%}
+.rep .zt th{background:#e0e7ff;text-align:left;font-size:11px}
+.rep .zt th,.rep .zt td{border:1px solid #cbd5e1;padding:5px 7px;vertical-align:middle}
+.rep .zt td.n{text-align:center;font-weight:700}
+.rep .pb{margin-top:14px}
+.rep .pbh{display:flex;justify-content:space-between;align-items:center;background:#1e3a8a;color:#fff;padding:7px 12px;border-radius:8px 8px 0 0;font-weight:800;font-size:14px;break-after:avoid}
+.rep .pt{width:100%;margin:0}
+.rep .pt th{background:#f1f5f9;font-size:10px;text-transform:uppercase;text-align:left}
+.rep .pt th,.rep .pt td{border:1px solid #cbd5e1;padding:4px 6px;vertical-align:top}
+.rep .pt tr{break-inside:avoid}
+.rep .pt img{width:1.9cm;height:1.45cm;object-fit:cover;border-radius:3px;display:block}
+.rep .pt .chk{width:1.4cm}
+.rep .sign{margin-top:30px;font-size:13px;line-height:2.4;break-inside:avoid}
+.rep .foot{margin-top:16px;font-size:10px;color:#94a3b8}
+</style>
+</head>
+<body>
+<header></header>
+<main></main>
+<button class="fab" id="fab" hidden onclick="shoot('new')" aria-label="Сделать фото"></button>
+<input type="file" id="cam" accept="image/*" capture="environment" hidden>
+<input type="file" id="gal" accept="image/*" multiple hidden>
+<div id="toast"></div>
+<div id="print"></div>
+
+<script>
+/* ---------- Иконки ---------- */
+const I={
+cam:'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+pdf:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+check:'<polyline points="20 6 9 17 4 12"/>',
+set:'<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>',
+back:'<polyline points="15 18 9 12 15 6"/>',fwd:'<polyline points="9 18 15 12 9 6"/>',
+user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+img:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+alert:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+undo:'<polyline points="1 4 1 10 7 10"/><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"/>',
+x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+down:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+up:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+circ:'<circle cx="12" cy="12" r="9"/>',
+arrow:'<line x1="5" y1="19" x2="19" y2="5"/><polyline points="9 5 19 5 19 15"/>',
+xls:'<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/>'
+};
+const ic=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${I[n]}</svg>`;
+
+/* ---------- База данных ---------- */
+let db;
+function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open('audits-db',1);
+ r.onupgradeneeded=()=>{const d=r.result;d.createObjectStore('audits',{keyPath:'id'});d.createObjectStore('kv')};
+ r.onsuccess=()=>{db=r.result;res()};r.onerror=()=>rej(r.error)})}
+function tx(store,mode,fn){return new Promise((res,rej)=>{const t=db.transaction(store,mode);const r=fn(t.objectStore(store));
+ t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error)})}
+const getAll=()=>tx('audits','readonly',s=>s.getAll());
+const getAudit=id=>tx('audits','readonly',s=>s.get(id));
+const putAudit=a=>tx('audits','readwrite',s=>s.put(a));
+const delAudit=id=>tx('audits','readwrite',s=>s.delete(id));
+const getKV=k=>tx('kv','readonly',s=>s.get(k));
+const setKV=(k,v)=>tx('kv','readwrite',s=>s.put(v,k));
+
+/* ---------- Утилиты ---------- */
+const $=s=>document.querySelector(s);
+const main=$('main');
+let S={company:'',auditor:'',zones:[],people:[]};
+let cur=null,draft=null,lastZone='',camMode='new',refresh=()=>home(),fResp='',fZone='',lastIssues=[],tab='list',lastPeople=[];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const nowLocal=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
+const today=()=>nowLocal().slice(0,10);
+const fmtDT=s=>s?new Date(s).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+const fmtD=s=>s?new Date(s+'T00:00').toLocaleDateString('ru-RU'):'без срока';
+const MON=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+const PR={1:'Низкий',2:'Средний',3:'Высокий'};
+const isOver=i=>!!(i.status!=='done'&&i.deadline&&i.deadline<today());
+const zoneResp=z=>(S.zones.find(x=>x.name===z)||{}).resp||'';
+const respList=i=>[i.resp,i.resp2].filter(Boolean);
+const respText=i=>respList(i).join(', ');
+const respOrNone=i=>respList(i).length?respList(i):['Не назначен'];
+function placesFor(z){return [...new Set((S.places||[]).filter(p=>!z||!p.zone||p.zone===z).map(p=>p.name))]}
+function placeOptions(z,cur){const L=placesFor(z);if(cur&&!L.includes(cur))L.push(cur);
+ return '<option value="">— выберите место —</option>'+L.map(p=>`<option value="${esc(p)}" ${p===cur?'selected':''}>${esc(p)}</option>`).join('')+'<option value="__new">＋ Другое место…</option>'}
+function placeSel(){const n=$('#f_place_sel').value==='__new',inp=$('#f_place');inp.style.display=n?'':'none';if(n)inp.focus()}
+function getPlace(){const s=$('#f_place_sel').value;if(s!=='__new')return s;const v=$('#f_place').value.trim();
+ if(v&&!placesFor(draft.zone).includes(v)){S.places.push({zone:draft.zone||'',name:v});setKV('settings',S)}return v}
+const locText=i=>[i.zone,i.place].filter(Boolean).join(' · ')||'Место не указано';
+const peopleOpts=()=>S.people.map(p=>`<option value="${esc(p)}">`).join('');
+const inits=n=>n.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('')||'?';
+
+function setHeader(title,sub,back){
+ $('header').innerHTML=(back?`<button class="hb" onclick="${back}">${ic('back')}</button>`:'')+
+  `<h1>${esc(title)}${sub?`<small>${esc(sub)}</small>`:''}</h1>`+(back?'':`<button class="hb" onclick="settings()">${ic('set')}</button>`);
+ window.scrollTo(0,0);
+}
+const setFab=show=>{$('#fab').hidden=!show};
+function modal(html){closeModal();const m=document.createElement('div');m.className='ov';
+ m.innerHTML=`<div class="sheet"><div class="handle"></div>${html}</div>`;document.body.append(m);return m}
+const closeModal=()=>document.querySelector('.ov')?.remove();
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1800)}
+
+function compress(file,max=1400,q=0.72){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);
+ img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');
+  c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+  URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',q))};
+ img.onerror=rej;img.src=url})}
+
+/* ---------- Итоги: градация по зонам и задачи по ответственным ---------- */
+function summarize(items){
+ const Z=new Map(),P=new Map();
+ items.forEach(i=>{
+  const z=i.zone||'Без зоны',done=i.status==='done';
+  if(!Z.has(z))Z.set(z,{name:z,total:0,open:0,hi:0,over:0,done:0});
+  const s=Z.get(z);s.total++;if(done)s.done++;else{s.open++;if(i.priority==3)s.hi++;if(isOver(i))s.over++}
+  respOrNone(i).forEach(r=>{if(!P.has(r))P.set(r,{name:r,items:[],open:0,hi:0,over:0});
+  const p=P.get(r);p.items.push(i);if(!done){p.open++;if(i.priority==3)p.hi++;if(isOver(i))p.over++}});
+ });
+ const dn=i=>i.status==='done'?1:0;
+ const people=[...P.values()].map(p=>{p.items.sort((a,b)=>dn(a)-dn(b)||isOver(b)-isOver(a)||(b.priority||2)-(a.priority||2)||
+   (a.deadline||'9999').localeCompare(b.deadline||'9999')||a._n-b._n);return p})
+  .sort((a,b)=>(a.name==='Не назначен')-(b.name==='Не назначен')||b.open-a.open||b.items.length-a.items.length);
+ const zones=[...Z.values()].sort((a,b)=>(b.hi+b.over>0)-(a.hi+a.over>0)||b.open-a.open||b.hi-a.hi||b.total-a.total);
+ return {zones,people};
+}
+const level=z=>z.hi||z.over?['Критично','o']:z.open?['Требует внимания','a']:['В норме','ok'];
+const bar=(z,max)=>`<div class="track"><div class="bar" style="width:${Math.max(4,z.total/max*100)}%">
+ <i class="h" style="flex:${z.hi}"></i><i class="m" style="flex:${z.open-z.hi}"></i><i class="d" style="flex:${z.done}"></i></div></div>`;
+const LEGEND='<div class="legend"><span><i style="background:#dc2626"></i>открыто, высокий приоритет</span><span><i style="background:#f59e0b"></i>открыто</span><span><i style="background:#16a34a"></i>устранено</span></div>';
+
+function summaryView(L){
+ if(!L.length)return '<div class="card mut" style="text-align:center">Нет данных для итогов</div>';
+ const {zones,people}=summarize(L),max=Math.max(1,...zones.map(z=>z.total));
+ lastPeople=people;
+ return `<div class="sec">Градация по зонам</div><div class="card">
+ ${zones.map(z=>{const[l,c]=level(z);return `<div class="zr"><div class="zr-h"><span class="t">${esc(z.name)}</span><span class="chip ${c}">${l}</span></div>
+  ${bar(z,max)}<div class="mut" style="margin-top:6px">всего ${z.total} · открыто ${z.open}${z.hi?' · высокий '+z.hi:''}${z.over?' · просрочено '+z.over:''}</div></div>`}).join('')}
+ ${LEGEND}</div>
+ <div class="sec">Кому что делать</div>
+ ${people.map((p,k)=>`<div class="card"><div class="ph-h"><div class="av">${esc(inits(p.name))}</div>
+  <div style="flex:1;min-width:0"><div class="t">${esc(p.name)}</div><div class="mut">открыто ${p.open} из ${p.items.length}${p.over?' · <b style="color:var(--red)">просрочено '+p.over+'</b>':''}</div></div>
+  <button class="btn sm" onclick="personPdf(${k})">${ic('pdf')} PDF</button></div>
+  ${p.items.map(i=>{const done=i.status==='done';return `<div class="pi ${done?'dn':''}" onclick="editIssue('${i._aid}','${i.id}')">
+   ${i.photos[0]?`<img src="${i.photos[0]}" loading="lazy">`:'<div class="nf"></div>'}
+   <div class="bd"><div class="t" style="font-size:14px">№${i._n} · ${esc(locText(i))}</div><div class="d">${esc(i.desc)||'—'}</div></div>
+   <span class="chip ${done?'ok':isOver(i)?'o':i.priority==3?'a':''}">${done?'✓ готово':fmtD(i.deadline)}</span></div>`}).join('')}</div>`).join('')}`;
+}
+function tabsHTML(){return `<div class="tabs"><button class="${tab==='list'?'on':''}" onclick="tab='list';refresh()">Замечания</button>
+ <button class="${tab==='sum'?'on':''}" onclick="tab='sum';refresh()">Итоги</button></div>`}
+function personPdf(k){
+ const p=lastPeople[k];if(!p)return;
+ printReport({title:'Задание: '+p.name,fname:'Задание_'+p.name.replace(/[\s.]+/g,'_')+'_'+today(),
+  info:[['Ответственный',p.name],['На дату',new Date().toLocaleDateString('ru-RU')]],items:p.items,showAudit:!!p.items[0]?._a});
+}
+
+/* ---------- Главная ---------- */
+async function home(){
+ refresh=home;cur=null;tab='list';setFab(false);
+ const list=(await getAll()).sort((a,b)=>b.date.localeCompare(a.date));
+ let open=0,over=0;list.forEach(a=>a.items.forEach(i=>{if(i.status!=='done'){open++;if(isOver(i))over++}}));
+ setHeader('Обходы',S.company||'Производственный контроль');
+ main.innerHTML=`<div class="stats">
+  <div class="stat"><b>${list.length}</b><span>обходов</span></div>
+  <div class="stat a"><b>${open}</b><span>открыто</span></div>
+  <div class="stat r"><b>${over}</b><span>просрочено</span></div></div>
+ <button class="btn p big full" onclick="auditForm()">${ic('cam')} Начать обход</button>
+ <button class="btn full" style="margin-top:10px" onclick="openIssues()">${ic('alert')} Открытые замечания ${open?`<span class="chip o">${open}</span>`:''}</button>
+ <button class="btn g full" style="margin-top:10px" onclick="excelExport('all')">${ic('xls')} Excel: контроль по всем обходам</button>
+ <div class="sec">История обходов</div>
+ ${list.length?list.map(auditCard).join(''):'<div class="card mut" style="text-align:center">Обходов пока нет.<br>Сначала заполните зоны и ответственных в настройках (кнопка справа вверху).</div>'}`;
+}
+function auditCard(a){
+ const d=new Date(a.date),open=a.items.filter(i=>i.status!=='done').length,over=a.items.filter(isOver).length;
+ return `<div class="card acard" onclick="tab='list';audit('${a.id}')"><div class="ic"><b>${d.getDate()}</b>${MON[d.getMonth()]}</div>
+ <div class="bd"><div class="t">${fmtDT(a.date)}</div><div class="mut">${esc(a.auditor||'—')}${a.note?' · '+esc(a.note):''}</div>
+ <div class="row" style="gap:6px;margin-top:8px">${a.closed?'<span class="chip ok">завершён</span>':'<span class="chip a">в процессе</span>'}
+ <span class="chip">${a.items.length} замеч.</span>${open?`<span class="chip o">открыто ${open}</span>`:''}${over?`<span class="chip o">просрочено ${over}</span>`:''}</div></div>
+ <div class="chev">${ic('fwd')}</div></div>`;
+}
+
+/* ---------- Обход ---------- */
+function auditForm(a){
+ modal(`<div class="sh-t">${a?'Параметры обхода':'Новый обход'}</div>
+ <div class="fld"><div class="lb">Дата и время</div><input type="datetime-local" id="a_date" value="${a?a.date:nowLocal()}"></div>
+ <div class="fld"><div class="lb">Проводит обход</div><input id="a_aud" list="pl2" value="${esc(a?a.auditor:(S.auditor||'руководитель ОК'))}" placeholder="руководитель ОК"><datalist id="pl2"><option value="руководитель ОК"></datalist></div>
+ <div class="sfoot"><button class="btn" onclick="closeModal()">Отмена</button>
+ <button class="btn p" style="flex:1" onclick="saveAudit(${a?'true':'false'})">${a?'Сохранить':ic('cam')+' Начать'}</button></div>`);
+}
+async function saveAudit(edit){
+ const a=edit?cur:{id:uid(),items:[],closed:false};
+ a.date=$('#a_date').value||nowLocal();a.auditor=$('#a_aud').value.trim()||'руководитель ОК';a.note=a.note||'';
+ if(!edit&&a.auditor&&a.auditor!==S.auditor){S.auditor=a.auditor;await setKV('settings',S)}
+ await putAudit(a);closeModal();tab='list';audit(a.id);
+}
+async function audit(id){
+ cur=await getAudit(id);if(!cur)return home();
+ refresh=()=>audit(id);
+ const open=cur.items.filter(i=>i.status!=='done').length;
+ const L=cur.items.map((i,k)=>({...i,_n:k+1,_aid:cur.id}));
+ setHeader('Обход',fmtDT(cur.date),'home()');
+ setFab(!cur.closed&&cur.items.length>0);
+ main.innerHTML=`<div class="card">
+  <div class="row" style="justify-content:space-between;align-items:center">
+   <div><div class="t">${esc(cur.auditor||'—')}</div><div class="mut">${cur.note?esc(cur.note):'проводит обход'}</div></div>
+   ${cur.closed?'<span class="chip ok">завершён</span>':'<span class="chip a">в процессе</span>'}</div>
+  <div class="mini"><div><b>${cur.items.length}</b>замечаний</div><div><b>${open}</b>открыто</div><div><b>${cur.items.length-open}</b>устранено</div></div>
+  <div class="row">
+   <button class="btn p" style="flex:1" onclick="auditReport()">${ic('pdf')} PDF</button>
+   <button class="btn g" style="flex:1" onclick="excelExport('audit')">${ic('xls')} Excel</button>
+   <button class="btn ${cur.closed?'':'g'}" style="flex:1" onclick="toggleClose()">${cur.closed?ic('undo')+' Возобновить':ic('check')+' Завершить'}</button>
+   <button class="btn ib" onclick="auditForm(cur)">${ic('edit')}</button>
+   <button class="btn ib d" onclick="removeAudit()">${ic('trash')}</button></div></div>
+ ${cur.items.length?tabsHTML()+(tab==='sum'?summaryView(L):L.map(i=>itemCard(i,i._n,cur.id)).join(''))
+  :cur.closed?'<div class="card mut">Замечаний нет.</div>'
+  :`<div class="empty"><button class="bigcam" onclick="shoot('new')">${ic('cam')}</button>
+    <div class="t">Сделайте первое фото</div><div class="mut">Фото → отметка → место → комментарий → следующее фото</div></div>`}`;
+}
+function itemCard(i,n,aid,extra=''){
+ const done=i.status==='done',over=isOver(i),ed=`editIssue('${aid}','${i.id}')`;
+ return `<div class="card icard ${done?'isdone':''}">
+ <div class="ph" onclick="${ed}">${i.photos[0]?`<img src="${i.photos[0]}" loading="lazy">`:`<div class="noph">${ic('img')}</div>`}
+  <span class="num">№${n}</span>${i.photos.length>1?`<span class="cnt">${ic('cam')}${i.photos.length}</span>`:''}
+  <span class="st">${done?'<span class="chip ok">✓ устранено</span>':over?'<span class="chip o">просрочено</span>':'<span class="chip o">открыто</span>'}
+  ${i.priority==3?'<span class="chip o">высокий</span>':''}</span></div>
+ <div class="bd" onclick="${ed}">
+  <div class="loc">${ic('pin')}<span>${esc(locText(i))}</span></div>
+  <div class="cmt">${esc(i.desc)||'<span class="mut">без комментария</span>'}</div>
+  <div class="meta"><span class="chip">${ic('user')}${esc(respText(i)||'не назначен')}</span>
+  <span class="chip ${over?'o':''}">${ic('cal')}${fmtD(i.deadline)}</span>${extra}</div></div>
+ <div class="act"><button class="btn sm ${done?'':'g'}" onclick="toggleItem('${aid}','${i.id}')">${done?ic('undo')+' Вернуть в работу':ic('check')+' Устранено'}</button></div></div>`;
+}
+async function toggleClose(){
+ cur.closed=!cur.closed;await putAudit(cur);
+ if(cur.closed)tab='sum';
+ await audit(cur.id);
+ if(cur.closed&&cur.items.length)doneSheet();
+}
+async function removeAudit(){
+ if(!confirm('Удалить обход и все его замечания безвозвратно?'))return;
+ await delAudit(cur.id);home();
+}
+async function toggleItem(aid,iid){
+ const a=await getAudit(aid),i=a.items.find(x=>x.id===iid);
+ if(i.status==='done'){i.status='open';delete i.doneAt}else{i.status='done';i.doneAt=new Date().toISOString()}
+ await putAudit(a);toast(i.status==='done'?'Отмечено как устранено':'Возвращено в работу');refresh();
+}
+
+/* ---------- Фото → отметка → место → комментарий ---------- */
+function shoot(m){camMode=m;$('#cam').click()}
+function pick(m){camMode=m;$('#gal').click()}
+async function onFiles(e){
+ const files=[...e.target.files];e.target.value='';if(!files.length)return;
+ toast('Обработка фото…');
+ const ph=[];for(const f of files){try{ph.push(await compress(f))}catch(_){toast('Не удалось прочитать фото')}}
+ if(!ph.length)return;
+ if(camMode==='add'&&draft&&$('.ov')){draft.photos.push(...ph);draft.ann.push(...ph.map(()=>null));renderShots()}
+ else if(cur){draft={id:uid(),photos:ph,ann:ph.map(()=>null),zone:lastZone,place:'',desc:'',resp:zoneResp(lastZone),deadline:'',priority:2,status:'open',fixNote:''};itemSheet(false)}
+}
+async function editIssue(aid,iid){
+ cur=await getAudit(aid);const it=cur?.items.find(x=>x.id===iid);if(!it)return;
+ draft=JSON.parse(JSON.stringify(it));
+ draft.ann=draft.ann||[];while(draft.ann.length<draft.photos.length)draft.ann.push(null);
+ itemSheet(true);
+}
+function itemSheet(isEdit){
+ const OTH='Другое',isOth=draft.zone===OTH;
+ const zones=S.zones.map(z=>z.name).filter(z=>z!==OTH);if(draft.zone&&!isOth&&!zones.includes(draft.zone))zones.push(draft.zone);
+ const n=isEdit?cur.items.findIndex(x=>x.id===draft.id)+1:cur.items.length+1;
+ modal(`<div class="sh-t">Замечание №${n}</div>
+ <div class="step"><i>1</i>Фото и отметка проблемы</div><div id="shots"></div>
+ <div class="step"><i>2</i>Местоположение</div>
+ <div class="zones">${zones.map(z=>`<button type="button" class="zc ${z===draft.zone?'on':''}" data-z="${esc(z)}" onclick="selZone(this)">${esc(z)}</button>`).join('')}<button type="button" class="zc ${isOth?'on':''}" data-z="${OTH}" onclick="selZone(this)">✎ Другое</button></div>
+ <div id="placeBox" style="display:${isOth?'none':''}"><div class="lb" style="margin-top:14px">Место обнаружения</div>
+ <select id="f_place_sel" onchange="placeSel()">${placeOptions(isOth?'':draft.zone,isOth?'':(draft.place||''))}</select>
+ <input id="f_place" style="margin-top:8px;display:none" placeholder="Впишите новое место — оно добавится в список"></div>
+ <div id="othBox" style="display:${isOth?'':'none'}"><div class="lb" style="margin-top:14px">Где это?</div>
+ <input id="f_other" placeholder="Например: склад сырья, ворота 2; столовая; лестница 3 этаж…" value="${isOth?esc(draft.place||''):''}"></div>
+ <div class="step"><i>3</i>Что не так</div>
+ <textarea id="f_desc" placeholder="Опишите несоответствие и что нужно сделать">${esc(draft.desc)}</textarea>
+ <div class="step"><i>4</i>Кто и когда исправляет</div>
+ <div><div class="lb">Ответственный</div>${respSel('f_resp',draft.resp)}</div>
+ <div class="fld"><div class="lb">Второй ответственный (необязательно)</div>${respSel('f_resp2',draft.resp2||'')}</div>
+ <div class="fld"><div class="lb">Срок</div><input type="date" id="f_dl" value="${draft.deadline||''}"></div>
+ <details ${isEdit?'open':''}><summary>Приоритет, статус, устранение</summary>
+  <div class="grid2"><div><div class="lb">Приоритет</div><select id="f_pr">${[1,2,3].map(p=>`<option value="${p}" ${draft.priority==p?'selected':''}>${PR[p]}</option>`).join('')}</select></div>
+  <div><div class="lb">Статус</div><select id="f_st"><option value="open">Открыто</option><option value="done" ${draft.status==='done'?'selected':''}>Устранено</option></select></div></div>
+  <div class="fld"><div class="lb">Комментарий по устранению</div><input id="f_fix" value="${esc(draft.fixNote||'')}"></div></details>
+ <div class="sfoot">${isEdit
+  ?`<button class="btn ib d" onclick="deleteItem('${draft.id}')">${ic('trash')}</button><button class="btn" onclick="closeModal()">Отмена</button>
+    <button class="btn p" style="flex:1" onclick="saveItem(false)">${ic('check')} Сохранить</button>`
+  :`<button class="btn ib" onclick="cancelNew()">${ic('x')}</button><button class="btn" style="flex:1" onclick="saveItem(false)">${ic('check')} Готово</button>
+    <button class="btn p" style="flex:1.5" onclick="saveItem(true)">${ic('cam')} Следующее фото</button>`}</div>`);
+ renderShots();
+}
+function renderShots(){
+ const p=draft.photos;
+ $('#shots').innerHTML=(p.length?`<div class="mainph"><img src="${p[0]}" onclick="annotate(0)">
+   <button class="markbtn" onclick="annotate(0)">${ic('circ')} ${draft.ann[0]?'Изменить отметки':'Отметить проблему'}</button></div>`
+  :`<button class="phempty" onclick="shoot('add')">${ic('cam')}<span>Сделать фото</span></button>`)+
+ `<div class="thumbs">${p.map((x,k)=>`<div class="th ${k===0?'on':''}"><img src="${x}" onclick="mainPh(${k})"><b onclick="rmPh(${k})">×</b></div>`).join('')}
+  <button class="th add" onclick="shoot('add')" title="Ещё фото">${ic('cam')}</button>
+  <button class="th add" onclick="pick('add')" title="Из галереи">${ic('img')}</button></div>`;
+}
+function mainPh(k){const [x]=draft.photos.splice(k,1),[a]=draft.ann.splice(k,1);draft.photos.unshift(x);draft.ann.unshift(a);renderShots()}
+function rmPh(k){if(confirm('Удалить это фото?')){draft.photos.splice(k,1);draft.ann.splice(k,1);renderShots()}}
+function selZone(el){
+ const z=el.dataset.z,prev=zoneResp(draft.zone);
+ draft.zone=draft.zone===z?'':z;
+ document.querySelectorAll('.zc').forEach(b=>b.classList.toggle('on',b.dataset.z===draft.zone));
+ const oth=draft.zone==='Другое';$('#othBox').style.display=oth?'':'none';$('#placeBox').style.display=oth?'none':'';
+ if(oth){setTimeout(()=>$('#f_other').focus(),50);return}
+ const ps=$('#f_place_sel'),pv=ps.value;ps.innerHTML=placeOptions(draft.zone,pv&&pv!=='__new'&&placesFor(draft.zone).includes(pv)?pv:'');placeSel();
+ const r=$('#f_resp');if(!r.value||r.value===prev)setResp('f_resp',zoneResp(draft.zone));
+}
+function respSel(id,val){
+ const L=[...S.people];if(val&&!L.includes(val))L.push(val);
+ return `<select id="${id}" onchange="respChg('${id}')"><option value="">— не выбран —</option>${L.map(p=>`<option ${p===val?'selected':''}>${esc(p)}</option>`).join('')}<option value="__new">＋ Другой…</option></select>`+
+  `<input id="${id}_new" placeholder="ФИО или должность" style="display:none;margin-top:8px">`;
+}
+function respChg(id){const n=$('#'+id+'_new'),on=$('#'+id).value==='__new';n.style.display=on?'':'none';if(on)n.focus()}
+function setResp(id,val){const s=$('#'+id);if(!s)return;
+ if(val&&![...s.options].some(o=>o.value===val)){const o=document.createElement('option');o.textContent=val;s.insertBefore(o,s.lastElementChild)}
+ s.value=val||'';respChg(id)}
+function getResp(id){const v=$('#'+id).value;if(v!=='__new')return v;
+ const t=$('#'+id+'_new').value.trim();if(t&&!S.people.includes(t)){S.people.push(t);setKV('settings',S)}return t}
+function cancelNew(){if(confirm('Отменить это замечание? Фото не сохранится.')){closeModal();draft=null}}
+function saveItem(next){
+ const oth=draft.zone==='Другое';
+ if(oth&&!$('#f_other').value.trim()){$('#f_other').focus();return alert('Впишите, где обнаружено несоответствие')}
+ Object.assign(draft,{place:oth?$('#f_other').value.trim():getPlace(),desc:$('#f_desc').value.trim(),resp:getResp('f_resp'),resp2:getResp('f_resp2'),
+  deadline:$('#f_dl').value,priority:+$('#f_pr').value,status:$('#f_st').value,fixNote:$('#f_fix').value.trim()});
+ if(!draft.photos.length&&!draft.desc)return alert('Добавьте фото или комментарий');
+ if(draft.status==='done')draft.doneAt=draft.doneAt||new Date().toISOString();else delete draft.doneAt;
+ if(draft.zone)lastZone=draft.zone;
+ const k=cur.items.findIndex(x=>x.id===draft.id);
+ if(k<0){draft.created=new Date().toISOString();cur.items.push(draft)}else cur.items[k]=draft;
+ const p=putAudit(cur);
+ if(next)shoot('new');
+ closeModal();draft=null;
+ p.then(()=>{toast('Сохранено ✓');refresh()}).catch(e=>alert('Ошибка сохранения: '+e));
+}
+async function deleteItem(id){
+ if(!confirm('Удалить замечание?'))return;
+ cur.items=cur.items.filter(x=>x.id!==id);await putAudit(cur);closeModal();refresh();
+}
+
+/* ---------- Разметка фото: круги, стрелки, карандаш ---------- */
+let A=null,annTool='circle',annCol='#ef4444';
+const COLS=['#ef4444','#facc15','#ffffff','#3b82f6'];
+function annotate(k){
+ const src=(draft.ann[k]&&draft.ann[k].o)||draft.photos[k];
+ const img=new Image();
+ img.onload=()=>{
+  A={k,img,shapes:draft.ann[k]?JSON.parse(JSON.stringify(draft.ann[k].s)):[],cur:null};
+  const el=document.createElement('div');el.id='ann';
+  el.innerHTML=`<div class="an-top"><button class="hb" onclick="annClose()">${ic('x')}</button>
+   <div class="an-t">Отметьте проблему</div>
+   <button class="hb" onclick="annUndo()" title="Отменить">${ic('undo')}</button>
+   <button class="an-ok" onclick="annSave()">${ic('check')} Готово</button></div>
+  <div class="an-wrap"><canvas id="anc"></canvas></div>
+  <div class="an-bot">
+   <div class="an-tools">${[['circle','circ','Круг'],['arrow','arrow','Стрелка'],['pen','edit','Карандаш']].map(([t,i,l])=>
+    `<button data-t="${t}" class="${t===annTool?'on':''}" onclick="annSetTool('${t}')">${ic(i)}${l}</button>`).join('')}</div>
+   <div class="an-cols">${COLS.map(c=>`<button data-c="${c}" class="${c===annCol?'on':''}" style="background:${c}" onclick="annSetCol('${c}')"></button>`).join('')}</div>
+   <div class="an-hint">Круг: проведите по диагонали или просто коснитесь. Стрелка: ведите от начала к проблеме</div></div>`;
+  document.body.append(el);
+  const c=$('#anc');c.width=img.naturalWidth;c.height=img.naturalHeight;
+  const pt=e=>{const r=c.getBoundingClientRect();return[+((e.clientX-r.left)/r.width).toFixed(4),+((e.clientY-r.top)/r.height).toFixed(4)]};
+  c.onpointerdown=e=>{e.preventDefault();c.setPointerCapture(e.pointerId);const p=pt(e);A.cur={t:annTool,c:annCol,p:annTool==='pen'?[p]:[p,p]};annDraw()};
+  c.onpointermove=e=>{if(!A||!A.cur)return;const p=pt(e);if(A.cur.t==='pen')A.cur.p.push(p);else A.cur.p[1]=p;annDraw()};
+  c.onpointerup=c.onpointercancel=()=>{
+   const s=A&&A.cur;if(!s)return;A.cur=null;
+   const a=s.p[0],z=s.p[s.p.length-1],d=Math.hypot(z[0]-a[0],z[1]-a[1]);
+   if(s.t==='circle'&&d<.03){const r=.07,ry=r*c.width/c.height;s.p=[[a[0]-r,a[1]-ry],[a[0]+r,a[1]+ry]]}
+   else if(s.t==='arrow'&&d<.03){annDraw();return}
+   else if(s.t==='pen'&&s.p.length<2){annDraw();return}
+   A.shapes.push(s);annDraw()};
+  requestAnimationFrame(()=>{annFit();annDraw()});
+ };
+ img.src=src;
+}
+function annFit(){const c=$('#anc');if(!c)return;const w=c.parentElement.clientWidth-12,h=c.parentElement.clientHeight-12,k=Math.min(w/c.width,h/c.height);
+ c.style.width=Math.floor(c.width*k)+'px';c.style.height=Math.floor(c.height*k)+'px'}
+function annDraw(){
+ const c=$('#anc');if(!c||!A)return;const x=c.getContext('2d'),W=c.width,H=c.height;
+ x.drawImage(A.img,0,0,W,H);
+ [...A.shapes,A.cur].filter(Boolean).forEach(s=>drawShape(x,s,W,H));
+}
+function drawShape(x,s,W,H){
+ const lw=Math.max(4,Math.round(Math.max(W,H)*.008));
+ x.save();x.strokeStyle=s.c;x.fillStyle=s.c;x.lineWidth=lw;x.lineCap='round';x.lineJoin='round';
+ x.shadowColor='rgba(0,0,0,.6)';x.shadowBlur=lw*1.2;
+ const P=s.p.map(([a,b])=>[a*W,b*H]);
+ if(s.t==='circle'){const[[a,b],[c,d]=P[0]]=P;x.beginPath();
+  x.ellipse((a+c)/2,(b+d)/2,Math.max(2,Math.abs(c-a)/2),Math.max(2,Math.abs(d-b)/2),0,0,Math.PI*2);x.stroke()}
+ else if(s.t==='arrow'){const[[x1,y1],[x2,y2]=P[0]]=P,an=Math.atan2(y2-y1,x2-x1),h=lw*4.5;
+  x.beginPath();x.moveTo(x1,y1);x.lineTo(x2-Math.cos(an)*h*.6,y2-Math.sin(an)*h*.6);x.stroke();
+  x.beginPath();x.moveTo(x2,y2);x.lineTo(x2-h*Math.cos(an-.45),y2-h*Math.sin(an-.45));x.lineTo(x2-h*Math.cos(an+.45),y2-h*Math.sin(an+.45));x.closePath();x.fill()}
+ else{x.beginPath();P.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));x.stroke()}
+ x.restore();
+}
+function annSetTool(t){annTool=t;document.querySelectorAll('.an-tools button').forEach(b=>b.classList.toggle('on',b.dataset.t===t))}
+function annSetCol(c){annCol=c;document.querySelectorAll('.an-cols button').forEach(b=>b.classList.toggle('on',b.dataset.c===c))}
+function annUndo(){if(A){A.shapes.pop();annDraw()}}
+function annClose(){$('#ann')?.remove();A=null}
+function annSave(){
+ const k=A.k;
+ if(!A.shapes.length){if(draft.ann[k]){draft.photos[k]=draft.ann[k].o;draft.ann[k]=null}}
+ else{const o=(draft.ann[k]&&draft.ann[k].o)||draft.photos[k];A.cur=null;annDraw();
+  draft.photos[k]=$('#anc').toDataURL('image/jpeg',.8);draft.ann[k]={o,s:A.shapes}}
+ annClose();renderShots();toast('Отметки сохранены');
+}
+window.addEventListener('resize',()=>{if($('#ann')){annFit()}});
+
+/* ---------- Открытые замечания ---------- */
+async function openIssues(){
+ refresh=openIssues;setFab(false);
+ const list=[];(await getAll()).forEach(a=>a.items.forEach(i=>{if(i.status!=='done')list.push({...i,_a:a.date,_aid:a.id})}));
+ const resps=[...new Set(list.flatMap(respOrNone))].sort();
+ const zones=[...new Set(list.map(i=>i.zone||'Без зоны'))].sort();
+ lastIssues=list.filter(i=>(!fResp||respOrNone(i).includes(fResp))&&(!fZone||(i.zone||'Без зоны')===fZone))
+  .sort((a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999')||a._a.localeCompare(b._a))
+  .map((i,k)=>({...i,_n:k+1}));
+ setHeader('Открытые замечания','по всем обходам','home()');
+ main.innerHTML=`<div class="card"><div class="grid2">
+  <select onchange="fResp=this.value;openIssues()"><option value="">Все ответственные</option>${resps.map(r=>`<option ${r===fResp?'selected':''}>${esc(r)}</option>`).join('')}</select>
+  <select onchange="fZone=this.value;openIssues()"><option value="">Все зоны</option>${zones.map(z=>`<option ${z===fZone?'selected':''}>${esc(z)}</option>`).join('')}</select></div>
+  <div class="row" style="margin-top:12px;align-items:center"><div class="t" style="flex:1">Найдено: ${lastIssues.length}</div>
+  <button class="btn g" onclick="excelExport('open')">${ic('xls')} Excel</button>
+  <button class="btn p" onclick="issuesReport()">${ic('pdf')} PDF</button></div></div>
+ ${lastIssues.length?tabsHTML()+(tab==='sum'?summaryView(lastIssues)
+  :lastIssues.map(i=>itemCard(i,i._n,i._aid,`<span class="chip">обход ${fmtDT(i._a).slice(0,10)}</span>`)).join(''))
+  :'<div class="card mut" style="text-align:center">Открытых замечаний нет 👍</div>'}`;
+}
+function issuesReport(){
+ if(!lastIssues.length)return alert('Нет замечаний для отчёта');
+ printReport({title:'Перечень открытых замечаний',fname:'Открытые_замечания_'+today(),
+  info:[['На дату',new Date().toLocaleDateString('ru-RU')],['Ответственный',fResp||'все'],['Зона',fZone||'все']],items:lastIssues,showAudit:true});
+}
+
+/* ---------- PDF ---------- */
+function auditReport(){
+ if(!cur.items.length)return alert('В обходе пока нет замечаний');
+ printReport({title:'Акт обхода производства',fname:'Обход_'+cur.date.slice(0,10)+'_'+cur.date.slice(11,16).replace(':','-'),
+  info:[['Дата обхода',fmtDT(cur.date)],['Провёл',cur.auditor],['Примечание',cur.note]],items:cur.items,sign:cur.auditor||''});
+}
+function pdfCard(i,showAudit){
+ const done=i.status==='done';
+ return `<div class="f">
+ <div class="fh"><span>№${i._n}</span><span>${i.priority==3?'<span class="s hi">ВЫСОКИЙ</span>':''}<span class="s ${done?'ok':'o'}">${done?'УСТРАНЕНО'+(i.doneAt?' '+new Date(i.doneAt).toLocaleDateString('ru-RU'):''):isOver(i)?'ПРОСРОЧЕНО':'ОТКРЫТО'}</span></span></div>
+ ${i.photos.length?`<div class="rph ${i.photos.length>1?'m':''}">${i.photos.map(p=>`<img src="${p}">`).join('')}</div>`:''}
+ <div class="fl"><div class="lb">Местоположение</div><div class="lv">${esc(locText(i))}</div></div>
+ <div class="fl"><div class="lb">Что не так</div><div class="lv c">${esc(i.desc).replace(/\n/g,'<br>')||'—'}</div></div>
+ <div class="fm"><div><div class="lb">Ответственный</div>${esc(respText(i)||'не назначен')}</div>
+  <div><div class="lb">Срок</div>${fmtD(i.deadline)}</div><div><div class="lb">Приоритет</div>${PR[i.priority]||'—'}</div>
+  ${showAudit&&i._a?`<div><div class="lb">Обход</div>${fmtDT(i._a).slice(0,10)}</div>`:''}</div>
+ ${i.fixNote?`<div class="fl"><div class="lb">Устранение</div><div class="lv c">${esc(i.fixNote)}</div></div>`:''}</div>`;
+}
+function printReport({title,fname,info,items,sign,showAudit}){
+ const L=items.map((i,k)=>({...i,_n:i._n||k+1}));
+ const open=L.filter(i=>i.status!=='done').length,over=L.filter(isOver).length;
+ const {zones,people}=summarize(L),maxZ=Math.max(1,...zones.map(z=>z.total));
+ const st=i=>i.status==='done'?'<span class="s ok">устранено</span>':isOver(i)?'<span class="s o">просрочено</span>':'<span class="s a">открыто</span>';
+ $('#print').innerHTML=`<div class="rep">
+ <div class="rh"><div><div class="rt">${esc(title)}</div>${S.company?`<div>${esc(S.company)}</div>`:''}</div>
+  <div class="rn">${L.length}<span>замечаний</span></div></div>
+ <table class="info">${info.filter(r=>r[1]).map(r=>`<tr><td>${esc(r[0])}:</td><td><b>${esc(r[1])}</b></td></tr>`).join('')}
+  <tr><td>Статус:</td><td><b>открыто ${open}</b>, устранено ${L.length-open}${over?`, <b style="color:#b91c1c">просрочено ${over}</b>`:''}</td></tr>
+  <tr><td>Итоги:</td><td>градация по зонам и задания по ответственным — в конце документа</td></tr></table>
+ ${L.map(i=>pdfCard(i,showAudit)).join('')}
+ <div class="sp">
+  <div class="rh"><div><div class="rt">Итоги</div><div>градация по зонам и распределение задач</div></div><div class="rn">${open}<span>открыто</span></div></div>
+  <h3>Градация по зонам</h3>
+  <table class="zt"><tr><th>Зона</th><th>Оценка</th><th>Всего</th><th>Открыто</th><th>Высокий</th><th>Просроч.</th><th style="width:28%">Распределение</th></tr>
+  ${zones.map(z=>{const[l,c]=level(z);return `<tr><td><b>${esc(z.name)}</b></td><td><span class="s ${c}">${l}</span></td>
+   <td class="n">${z.total}</td><td class="n">${z.open}</td><td class="n">${z.hi||'—'}</td><td class="n">${z.over||'—'}</td><td>${bar(z,maxZ)}</td></tr>`}).join('')}</table>
+  ${LEGEND}
+  <h3>Кому что делать</h3>
+  ${people.map(p=>`<div class="pb"><div class="pbh"><span>${esc(p.name)}</span>
+   <span style="font-size:11px;font-weight:400">открыто ${p.open} из ${p.items.length}${p.over?' · просрочено '+p.over:''}${p.hi?' · высокий приоритет '+p.hi:''}</span></div>
+   <table class="pt"><tr><th>№</th><th>Фото</th><th>Место</th><th>Что не так</th><th>Срок</th><th>Статус</th>${showAudit?'<th>Обход</th>':''}<th class="chk">Отметка</th></tr>
+   ${p.items.map(i=>`<tr><td><b>${i._n}</b>${i.priority==3?'<br><span class="s hi" style="margin:3px 0 0">!</span>':''}</td>
+    <td>${i.photos[0]?`<img src="${i.photos[0]}">`:''}</td><td>${esc(locText(i))}</td><td>${esc(i.desc)||'—'}</td>
+    <td>${fmtD(i.deadline)}</td><td>${st(i)}</td>${showAudit?`<td>${i._a?fmtDT(i._a).slice(0,10):''}</td>`:''}<td></td></tr>`).join('')}</table></div>`).join('')}
+ </div>
+ ${sign!==undefined?`<div class="sign">Провёл обход: ______________________ ${esc(sign)}<br>Ознакомлены: ______________________________________________<br>______________________________________________________________</div>`:''}
+ <div class="foot">Сформировано ${new Date().toLocaleString('ru-RU')}</div></div>`;
+ document.title=fname;
+ const imgs=[...$('#print').querySelectorAll('img')];
+ Promise.all(imgs.map(im=>im.complete?1:new Promise(r=>im.onload=im.onerror=r))).then(()=>setTimeout(()=>window.print(),300));
+}
+
+/* ---------- Excel: контроль выполнения (.xlsx без библиотек) ---------- */
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+function zip(files){
+ const enc=new TextEncoder(),parts=[],central=[];let off=0;
+ files.forEach(f=>{const name=enc.encode(f.name),data=enc.encode(f.data),crc=crc32(data);
+  const h=new DataView(new ArrayBuffer(30));
+  h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint16(10,0,true);h.setUint16(12,0x21,true);
+  h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,name.length,true);h.setUint16(28,0,true);
+  parts.push(new Uint8Array(h.buffer),name,data);
+  const c=new DataView(new ArrayBuffer(46));
+  c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);c.setUint16(12,0,true);c.setUint16(14,0x21,true);
+  c.setUint32(16,crc,true);c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,name.length,true);c.setUint32(42,off,true);
+  central.push(new Uint8Array(c.buffer),name);
+  off+=30+name.length+data.length});
+ const cs=central.reduce((s,a)=>s+a.length,0),e=new DataView(new ArrayBuffer(22));
+ e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cs,true);e.setUint32(16,off,true);
+ return new Blob([...parts,...central,new Uint8Array(e.buffer)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+const xesc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'');
+const colL=n=>{let s='';n++;while(n){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=(n-m-1)/26}return s};
+const xDate=d=>{if(!d)return null;const[y,m,dd]=d.slice(0,10).split('-').map(Number);return (Date.UTC(y,m-1,dd)-Date.UTC(1899,11,30))/864e5};
+const locDate=iso=>{if(!iso)return '';const d=new Date(iso);return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+function xCell(c,ref){
+ if(c==null)return '';
+ if(typeof c!=='object')c={v:c};
+ const s=c.s?` s="${c.s}"`:'';
+ if(c.f)return `<c r="${ref}"${s}><f>${xesc(c.f)}</f></c>`;
+ if('d' in c){const n=xDate(c.d);return n==null?`<c r="${ref}"${s}/>`:`<c r="${ref}"${s}><v>${n}</v></c>`}
+ if(typeof c.v==='number')return `<c r="${ref}"${s}><v>${c.v}</v></c>`;
+ if(c.v==null||c.v==='')return `<c r="${ref}"${s}/>`;
+ return `<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${xesc(c.v)}</t></is></c>`;
+}
+function sheetXML(sh){
+ const rows=sh.rows.map((r,i)=>{const n=i+1,h=sh.heights&&sh.heights[i];
+  return `<row r="${n}"${h?` ht="${h}" customHeight="1"`:''}>${r.map((c,j)=>xCell(c,colL(j)+n)).join('')}</row>`}).join('');
+ const cols=`<cols>${sh.cols.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols>`;
+ const pane=sh.freeze?`<pane ySplit="${sh.freeze}" topLeftCell="A${sh.freeze+1}" activePane="bottomLeft" state="frozen"/>`:'';
+ let pr=1;
+ const cf=(sh.cf||[]).map(([ref,rules])=>`<conditionalFormatting sqref="${ref}">${rules.map(([dxf,f])=>`<cfRule type="expression" dxfId="${dxf}" priority="${pr++}"><formula>${xesc(f)}</formula></cfRule>`).join('')}</conditionalFormatting>`).join('');
+ const dv=sh.dv&&sh.dv.length?`<dataValidations count="${sh.dv.length}">${sh.dv.map(([ref,list])=>`<dataValidation type="list" allowBlank="1" showErrorMessage="1" sqref="${ref}"><formula1>"${xesc(list.join(','))}"</formula1></dataValidation>`).join('')}</dataValidations>`:'';
+ const mg=sh.merge&&sh.merge.length?`<mergeCells count="${sh.merge.length}">${sh.merge.map(m=>`<mergeCell ref="${m}"/>`).join('')}</mergeCells>`:'';
+ return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0">${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/>${cols}<sheetData>${rows}</sheetData>${sh.filter?`<autoFilter ref="${sh.filter}"/>`:''}${mg}${cf}${dv}<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>`;
+}
+const XSTY=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="dd.mm.yyyy"/></numFmts><fonts count="4"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><b/><sz val="14"/><color rgb="FF1E3A8A"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1E3A8A"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border>${['left','right','top','bottom'].map(s=>`<${s} style="thin"><color rgb="FFCBD5E1"/></${s}>`).join('')}<diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="11">${[
+ [0,0,0,0,''],
+ [0,1,2,1,'<alignment horizontal="center" vertical="center" wrapText="1"/>'],
+ [0,0,0,1,'<alignment vertical="top" wrapText="1"/>'],
+ [164,0,0,1,'<alignment horizontal="center" vertical="top"/>'],
+ [1,0,0,1,'<alignment horizontal="center" vertical="top"/>'],
+ [9,0,0,1,'<alignment horizontal="center" vertical="top"/>'],
+ [0,2,0,0,''],
+ [0,3,0,1,'<alignment vertical="top" wrapText="1"/>'],
+ [0,0,0,1,'<alignment horizontal="center" vertical="top" wrapText="1"/>'],
+ [1,3,0,1,'<alignment horizontal="center"/>'],
+ [9,3,0,1,'<alignment horizontal="center"/>']
+].map(([n,f,fi,b,al])=>`<xf numFmtId="${n}" fontId="${f}" fillId="${fi}" borderId="${b}" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"${al?' applyAlignment="1">'+al+'</xf>':'/>'}`).join('')}</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles><dxfs count="3">${[['15803D','DCFCE7'],['B91C1C','FEE2E2'],['B45309','FEF3C7']].map(([f,b])=>`<dxf><font><color rgb="FF${f}"/></font><fill><patternFill><bgColor rgb="FF${b}"/></patternFill></fill></dxf>`).join('')}</dxfs></styleSheet>`;
+function buildXlsx(sheets){
+ const NS='http://schemas.openxmlformats.org',X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+ const abs=r=>r.replace(/([A-Z]+)(\d+)/g,'$$$1$$$2');
+ const defs=sheets.some(s=>s.filter)?`<definedNames>${sheets.map((s,i)=>s.filter?`<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">'${xesc(s.name)}'!${abs(s.filter)}</definedName>`:'').join('')}</definedNames>`:'';
+ return zip([
+  {name:'[Content_Types].xml',data:`${X}<Types xmlns="${NS}/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`},
+  {name:'_rels/.rels',data:`${X}<Relationships xmlns="${NS}/package/2006/relationships"><Relationship Id="rId1" Type="${NS}/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`},
+  {name:'xl/workbook.xml',data:`${X}<workbook xmlns="${NS}/spreadsheetml/2006/main" xmlns:r="${NS}/officeDocument/2006/relationships"><bookViews><workbookView/></bookViews><sheets>${sheets.map((s,i)=>`<sheet name="${xesc(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets>${defs}<calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`},
+  {name:'xl/_rels/workbook.xml.rels',data:`${X}<Relationships xmlns="${NS}/package/2006/relationships">${sheets.map((s,i)=>`<Relationship Id="rId${i+1}" Type="${NS}/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length+1}" Type="${NS}/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`},
+  {name:'xl/styles.xml',data:XSTY},
+  ...sheets.map((s,i)=>({name:`xl/worksheets/sheet${i+1}.xml`,data:sheetXML(s)}))
+ ]);
+}
+async function excelExport(scope){
+ let items=[],title,fname;
+ if(scope==='audit'){items=cur.items.map((i,k)=>({...i,_n:k+1,_a:cur.date}));title='Обход '+fmtDT(cur.date)+(cur.auditor?' · '+cur.auditor:'');fname='Контроль_обход_'+cur.date.slice(0,10)}
+ else if(scope==='open'){items=lastIssues;title='Открытые замечания на '+new Date().toLocaleDateString('ru-RU')+(fResp?' · '+fResp:'')+(fZone?' · '+fZone:'');
+  fname='Контроль_открытые_'+(fResp?fResp.replace(/[\s.]+/g,'_')+'_':'')+today()}
+ else{(await getAll()).sort((a,b)=>a.date.localeCompare(b.date)).forEach(a=>a.items.forEach((i,k)=>items.push({...i,_n:k+1,_a:a.date})));
+  title='Все обходы';fname='Контроль_все_обходы_'+today()}
+ if(!items.length)return alert('Нет замечаний для выгрузки');
+ const SN='Замечания',R=`'${SN}'!`,first=5,last=first+items.length-1,end=Math.max(2000,last+500);
+ const sub=title+(S.company?' · '+S.company:'')+' · сформировано '+new Date().toLocaleString('ru-RU');
+ const head=a=>a.map(h=>({v:h,s:1}));
+ /* Лист: все замечания */
+ const rows=[[{v:'Контроль устранения замечаний',s:6}],[{v:sub}],[],head(['№','Дата обхода','Зона','Место','Что не так','Ответственный','Приоритет','Срок','Статус','Дата устранения','Просрочка, дн.','Комментарий по устранению','Отметка контроля'])];
+ const heights=[24,0,0,32];
+ items.forEach((i,k)=>{const r=first+k;
+  rows.push([{v:i._n,s:4},{d:i._a?i._a.slice(0,10):'',s:3},{v:i.zone||'Без зоны',s:2},{v:i.place||'',s:2},{v:i.desc||'',s:2},{v:respText(i)||'Не назначен',s:2},
+   {v:PR[i.priority]||'Средний',s:8},{d:i.deadline||'',s:3},{v:i.status==='done'?'устранено':'открыто',s:8},{d:locDate(i.doneAt),s:3},
+   {f:`IF(AND(I${r}="открыто",ISNUMBER(H${r}),H${r}<TODAY()),TODAY()-H${r},"")`,s:4},{v:i.fixNote||'',s:2},{v:'',s:2}]);
+  const lines=Math.max(1,...[[i.desc,45],[i.place,22],[i.fixNote,30],[i.zone,18],[respText(i),22]].map(([t,w])=>{t=String(t||'');return t.split('\n').reduce((s,l)=>s+Math.max(1,Math.ceil(l.length/(w*1.1))),0)}));
+  heights.push(Math.min(15*lines+3,200));
+ });
+ const shItems={name:SN,rows,heights,cols:[6,12,18,22,45,22,11,12,13,13,11,30,20],freeze:4,filter:`A4:M${last}`,merge:['A1:M1','A2:M2'],
+  dv:[[`I${first}:I${end}`,['открыто','устранено']],[`G${first}:G${end}`,['Низкий','Средний','Высокий']]],
+  cf:[[`A${first}:M${end}`,[[1,`AND(ISNUMBER($K${first}),$K${first}>0)`]]],[`I${first}:I${end}`,[[0,`$I${first}="устранено"`],[2,`$I${first}="открыто"`]]]]};
+ const {zones,people}=summarize(items);
+ /* Лист: по ответственным */
+ const pr=[[{v:'Кому что делать — контроль по ответственным',s:6}],[{v:sub}],[],head(['Ответственный','Всего','Открыто','Просрочено','Устранено','% выполнения'])];
+ people.forEach((p,k)=>{const r=first+k,n=`$A${r}`,F=`${R}$F:$F,"*"&${n}&"*"`;
+  pr.push([{v:p.name,s:7},{f:`COUNTIF(${F})`,s:4},{f:`COUNTIFS(${F},${R}$I:$I,"открыто")`,s:4},{f:`COUNTIFS(${F},${R}$I:$I,"открыто",${R}$H:$H,"<"&TODAY())`,s:4},
+   {f:`COUNTIFS(${F},${R}$I:$I,"устранено")`,s:4},{f:`IF(B${r}=0,"",E${r}/B${r})`,s:5}])});
+ const pt=first+people.length,pl=pt-1;
+ pr.push([{v:'ИТОГО',s:7},...['B','C','D','E'].map(c=>({f:`SUM(${c}${first}:${c}${pl})`,s:9})),{f:`IF(B${pt}=0,"",E${pt}/B${pt})`,s:10}]);
+ const shPeople={name:'По ответственным',rows:pr,heights:[24,0,0,32],cols:[32,10,10,12,11,14],freeze:4,merge:['A1:F1','A2:F2'],
+  cf:[[`D${first}:D${pt}`,[[1,`D${first}>0`]]],[`C${first}:C${pl}`,[[2,`C${first}>0`]]],[`F${first}:F${pt}`,[[0,`AND(ISNUMBER(F${first}),F${first}>=1)`]]]]};
+ /* Лист: по зонам */
+ const zr=[[{v:'Градация по зонам',s:6}],[{v:sub}],[],head(['Зона','Оценка','Всего','Открыто','Высокий приоритет','Просрочено','Устранено','% выполнения'])];
+ zones.forEach((z,k)=>{const r=first+k,C=`${R}$C:$C,$A${r}`;
+  zr.push([{v:z.name,s:7},{f:`IF(E${r}+F${r}>0,"Критично",IF(D${r}>0,"Требует внимания","В норме"))`,s:8},{f:`COUNTIF(${C})`,s:4},
+   {f:`COUNTIFS(${C},${R}$I:$I,"открыто")`,s:4},{f:`COUNTIFS(${C},${R}$I:$I,"открыто",${R}$G:$G,"Высокий")`,s:4},
+   {f:`COUNTIFS(${C},${R}$I:$I,"открыто",${R}$H:$H,"<"&TODAY())`,s:4},{f:`COUNTIFS(${C},${R}$I:$I,"устранено")`,s:4},{f:`IF(C${r}=0,"",G${r}/C${r})`,s:5}])});
+ const zt=first+zones.length,zl=zt-1;
+ zr.push([{v:'ИТОГО',s:7},{v:'',s:7},...['C','D','E','F','G'].map(c=>({f:`SUM(${c}${first}:${c}${zl})`,s:9})),{f:`IF(C${zt}=0,"",G${zt}/C${zt})`,s:10}]);
+ const shZones={name:'По зонам',rows:zr,heights:[24,0,0,32],cols:[30,18,9,10,12,12,11,14],freeze:4,merge:['A1:H1','A2:H2'],
+  cf:[[`B${first}:B${zl}`,[[1,`$B${first}="Критично"`],[2,`$B${first}="Требует внимания"`],[0,`$B${first}="В норме"`]]],[`F${first}:F${zt}`,[[1,`F${first}>0`]]]]};
+ const blob=buildXlsx([shPeople,shZones,shItems]);
+ if(scope==='audit')markExp('xlsx');
+ return saveFile(blob,fname+'.xlsx');
+}
+
+/* ---------- Сохранение файла: на телефоне — меню «Поделиться» (Файлы / Диск / мессенджер), на ПК — в «Загрузки» ---------- */
+const XMIME='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+let pendingFile=null;
+function isMobile(){return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Mac/.test(navigator.platform))}
+function inApp(){return /Telegram|WhatsApp|Instagram|FBAN|FBAV|VKClient|Viber|; wv\)/i.test(navigator.userAgent)}
+function downloadBlob(blob,name){
+ blob=new Blob([blob],{type:XMIME});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.type=XMIME;a.download=name;document.body.append(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(a.href),15000);
+}
+async function saveFile(blob,name){
+ const file=new File([blob],name,{type:XMIME});
+ // Только файл, без title/text: иначе мессенджеры отправляют текст вместо файла
+ if(isMobile()&&navigator.canShare&&navigator.canShare({files:[file]})){
+  try{await navigator.share({files:[file]});toast('Excel сохранён ✓');return}
+  catch(e){
+   if(e.name==='AbortError')return;
+   pendingFile=file;return saveAgainSheet(name);
+  }
+ }
+ // Android Chrome не умеет «делиться» xlsx — сохраняем в «Загрузки» и подсказываем, как отправить
+ downloadBlob(blob,name);
+ if(isMobile())downloadedSheet(name);else toast('Excel-файл сохранён в «Загрузки» ✓');
+}
+function downloadedSheet(name){
+ modal(`<div class="sh-t">Excel сохранён ✓</div>
+ <div class="mut" style="margin:6px 0 12px">Файл <b>${esc(name)}</b> лежит в папке <b>«Загрузки»</b> (Download).</div>
+ <div class="card" style="background:#f0fdf4;box-shadow:none"><b>Как отправить в чат файлом:</b><br>
+ 1. В мессенджере нажмите 📎 (скрепку) → <b>«Файл»</b> (не «Галерея»).<br>
+ 2. Откройте папку «Загрузки» и выберите файл .xlsx.</div>
+ ${inApp()?`<div class="card" style="background:#fef3c7;box-shadow:none">⚠️ Приложение открыто внутри мессенджера. В нём файлы часто не сохраняются или открываются текстом. Откройте ссылку в браузере: меню ⋮ → <b>«Открыть в Chrome / Safari»</b>.</div>`:''}
+ <div class="sfoot"><button class="btn full" onclick="closeModal()">Понятно</button></div>`);
+}
+function saveAgainSheet(name){
+ modal(`<div class="sh-t">Excel-файл готов</div>
+ <div class="mut" style="margin:6px 0 16px">${esc(name)}<br>Нажмите кнопку и выберите «Сохранить в Файлы», Google Диск или мессенджер.</div>
+ <button class="btn g big full" onclick="sharePending()">${ic('xls')} Сохранить файл</button>
+ <div class="sfoot"><button class="btn full" onclick="closeModal()">Закрыть</button></div>`);
+}
+async function sharePending(){
+ if(!pendingFile)return;
+ try{await navigator.share({files:[pendingFile]});closeModal();toast('Excel сохранён ✓')}
+ catch(e){if(e.name!=='AbortError'){downloadBlob(pendingFile,pendingFile.name);downloadedSheet(pendingFile.name)}}
+}
+
+/* ---------- Окно «Обход завершён»: PDF + Excel в архив ---------- */
+function markExp(k){
+ if(!cur)return;cur.exports={...(cur.exports||{}),[k]:new Date().toISOString()};
+ putAudit(cur);updDone();
+}
+function expPdf(){markExp('pdf');auditReport()}
+function expXls(){excelExport('audit')}
+function updDone(){
+ const e=cur&&cur.exports||{},t=s=>new Date(s).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+ const p=$('#d_pdf'),x=$('#d_xls');
+ if(p)p.innerHTML=ic(e.pdf?'check':'pdf')+(e.pdf?' PDF сохранён в '+t(e.pdf)+' · ещё раз':' Сохранить PDF');
+ if(x)x.innerHTML=ic(e.xlsx?'check':'xls')+(e.xlsx?' Excel сохранён в '+t(e.xlsx)+' · ещё раз':' Сохранить Excel');
+}
+function doneSheet(){
+ modal(`<div class="sh-t">Обход завершён ✓</div>
+ <div class="mut" style="margin:6px 0 16px">Сохраните оба отчёта в архив: <b>PDF</b> для ознакомления (фото и комментарии), <b>Excel</b> для контроля выполнения ответственными. Удобно класть оба файла в одну папку.</div>
+ <button class="btn p big full" id="d_pdf" onclick="expPdf()"></button>
+ <button class="btn g big full" style="margin-top:10px" id="d_xls" onclick="expXls()"></button>
+ <div class="sfoot"><button class="btn full" onclick="closeModal()">Готово</button></div>`);
+ updDone();
+}
+
+/* ---------- Настройки ---------- */
+function settings(){
+ refresh=settings;setFab(false);
+ setHeader('Настройки','','home()');
+ main.innerHTML=`<div class="card">
+ <div class="lb">Предприятие / подразделение (шапка PDF)</div><input id="s_co" value="${esc(S.company)}">
+ <div class="fld"><div class="lb">Кто обычно проводит обходы</div><input id="s_aud" value="${esc(S.auditor)}"></div>
+ <div class="fld"><div class="lb">Зоны: по одной на строку. Ответственного по умолчанию можно указать через « | »</div>
+ <textarea id="s_z" rows="8" placeholder="Цех №1 | Иванов И.И.">${esc(S.zones.map(z=>z.name+(z.resp?' | '+z.resp:'')).join('\n'))}</textarea></div>
+ <div class="fld"><div class="lb">Места обнаружения: по одному на строку. Чтобы место показывалось только в своей зоне, пишите «Зона: место»</div>
+ <textarea id="s_pl" rows="8" placeholder="Цех №1: Станок №3&#10;Склад сырья: Ворота 2&#10;Проходы и лестницы">${esc((S.places||[]).map(p=>(p.zone?p.zone+': ':'')+p.name).join('\n'))}</textarea></div>
+ <div class="fld"><div class="lb">Ответственные: по одному на строку</div><textarea id="s_p" rows="6">${esc(S.people.join('\n'))}</textarea></div>
+ <button class="btn p full" style="margin-top:16px" onclick="saveSettings()">${ic('check')} Сохранить</button></div>
+ <div class="card"><div class="t">Резервная копия</div>
+ <div class="mut" style="margin:6px 0 12px">Данные хранятся только на этом устройстве. Скачивайте копию раз в неделю. Через неё же база переносится на другой телефон или ПК.</div>
+ <div class="row"><button class="btn" style="flex:1" onclick="exportBackup()">${ic('down')} Скачать</button>
+ <button class="btn" style="flex:1" onclick="importBackup()">${ic('up')} Восстановить</button></div></div>`;
+}
+async function saveSettings(){
+ S.company=$('#s_co').value.trim();S.auditor=$('#s_aud').value.trim();
+ S.zones=$('#s_z').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const[n,r]=l.split('|').map(x=>x.trim());return{name:n,resp:r||''}});
+ S.people=$('#s_p').value.split('\n').map(l=>l.trim()).filter(Boolean);
+ S.places=$('#s_pl').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const k=l.indexOf(':'),z=k>0?l.slice(0,k).trim():'';
+  return S.zones.some(x=>x.name===z)?{zone:z,name:l.slice(k+1).trim()}:{zone:'',name:l}}).filter(p=>p.name);
+ S.zones.forEach(z=>{if(z.resp&&!S.people.includes(z.resp))S.people.push(z.resp)});
+ await setKV('settings',S);toast('Сохранено ✓');home();
+}
+async function exportBackup(){
+ const data={app:'obhody',v:3,exported:new Date().toISOString(),settings:S,audits:await getAll()};
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
+ a.download='obhody_backup_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),10000);
+}
+function importBackup(){
+ const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';
+ inp.onchange=async()=>{try{const d=JSON.parse(await inp.files[0].text());if(!Array.isArray(d.audits))throw 0;
+  if(!confirm(`Загрузить обходов: ${d.audits.length}? Совпадающие будут заменены.`))return;
+  for(const a of d.audits)await putAudit(a);
+  if(d.settings){S={...S,...d.settings};await setKV('settings',S)}
+  toast('Восстановлено ✓');home()}catch(e){alert('Не удалось прочитать файл копии')}};
+ inp.click();
+}
+
+/* ---------- Запуск ---------- */
+(async()=>{
+ $('#fab').innerHTML=ic('cam');
+ $('#cam').onchange=onFiles;$('#gal').onchange=onFiles;
+ await openDB();
+ const s=await getKV('settings');
+ S.places=[];if(s)S={...S,...s,places:s.places||[]};
+ else{S.zones=['Склад сырья','Цех №1','Цех №2','Участок упаковки','Склад готовой продукции','Территория'].map(n=>({name:n,resp:''}));await setKV('settings',S)}
+ if(!S.seedDept5){
+  const SEED={'Департамент печати':['302','304','305','306','307','308','309','310'],'Департамент вырубки и тиснения':['501','502','505','506','520','525','533','536','545','555','577','598','599'],'Департамент склейки':['619','625','626','627','629','630','635','644'],'Спецсклейка':['Formpack','Kohman','GMA/MANZ','Clamshell'],'Департамент Ротогравюры':['Lemanic','MK','new MK']};
+  S.places=S.places||[];
+  let pos=0;
+  for(const [z,list] of Object.entries(SEED)){
+   const zi=S.zones.findIndex(x=>x.name===z);
+   if(zi<0){S.zones.splice(pos,0,{name:z,resp:''});pos++}else pos=Math.max(pos,zi+1);
+   list.forEach(p=>{if(!S.places.some(x=>x.zone===z&&x.name===p))S.places.push({zone:z,name:p})});
+  }
+  S.seedDept1=true;S.seedDept2=true;S.seedDept3=true;S.seedDept4=true;S.seedDept5=true;await setKV('settings',S);
+ }
+ if(!S.fixLem1){
+  const OLD='Lemanik',NEW='Lemanic';
+  S.places=(S.places||[]).filter(p=>!(p.name===OLD&&S.places.some(x=>x.name===NEW&&x.zone===p.zone)));
+  S.places.forEach(p=>{if(p.name===OLD)p.name=NEW});
+  for(const a of await getAll()){let ch=false;a.items.forEach(i=>{if(i.place===OLD){i.place=NEW;ch=true}});if(ch)await putAudit(a)}
+  S.fixLem1=true;await setKV('settings',S);
+ }
+ if(!S.seedPeople1){
+  const PEOPLE=['руководитель департамента печати','руководитель департамента вырубки и тиснения','руководитель департамента склейки','руководитель департамента Ротогравюра','менеджер АХВ','руководитель СЭ','руководитель СГМ','руководитель СГП','руководитель ССиМ'];
+  S.people=[...PEOPLE,...(S.people||[]).filter(p=>!PEOPLE.includes(p))];
+  const ZR={'Департамент печати':'руководитель департамента печати','Департамент вырубки и тиснения':'руководитель департамента вырубки и тиснения','Департамент склейки':'руководитель департамента склейки','Департамент Ротогравюры':'руководитель департамента Ротогравюра'};
+  S.zones.forEach(z=>{if(!z.resp&&ZR[z.name])z.resp=ZR[z.name]});
+  S.seedPeople1=true;await setKV('settings',S);
+ }
+ if(!S.cleanLists1){
+  const Z={'Департамент печати':['302','304','305','306','307','308','309','310'],'Департамент вырубки и тиснения':['501','502','505','506','520','525','533','536','545','555','577','598','599'],'Департамент склейки':['619','625','626','627','629','630','635','644'],'Спецсклейка':['Formpack','Kohman','GMA/MANZ','Clamshell'],'Департамент Ротогравюры':['Lemanic','MK','new MK']};
+  const ZR={'Департамент печати':'руководитель департамента печати','Департамент вырубки и тиснения':'руководитель департамента вырубки и тиснения','Департамент склейки':'руководитель департамента склейки','Департамент Ротогравюры':'руководитель департамента Ротогравюра','Спецсклейка':'руководитель департамента склейки'};
+  S.zones=Object.keys(Z).map(n=>({name:n,resp:ZR[n]||''}));
+  S.places=[];for(const [z,l] of Object.entries(Z))l.forEach(p=>S.places.push({zone:z,name:p}));
+  S.people=['руководитель департамента печати','руководитель департамента вырубки и тиснения','руководитель департамента склейки','руководитель департамента Ротогравюра','менеджер АХВ','руководитель СЭ','руководитель СГМ','руководитель СГП','руководитель ССиМ'];
+  S.auditor='руководитель ОК';
+  S.cleanLists1=true;await setKV('settings',S);
+ }
+ if(!S.fixSpec1){
+  const z=S.zones.find(x=>x.name==='Спецсклейка');
+  if(z&&!z.resp)z.resp='руководитель департамента склейки';
+  S.fixSpec1=true;await setKV('settings',S);
+ }
+ navigator.storage?.persist?.();
+ window.addEventListener('afterprint',()=>document.title='Обходы производства');
+ home();
+})();
+</script>
+</body>
+</html>
