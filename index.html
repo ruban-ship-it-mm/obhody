@@ -232,6 +232,27 @@ details input,details select{background:#fff}
 .rep .pt .chk{width:1.4cm}
 .rep .sign{margin-top:30px;font-size:13px;line-height:2.4;break-inside:avoid}
 .rep .foot{margin-top:16px;font-size:10px;color:#94a3b8}
+/* ===== Фирменный цвет ММПОФ: Pantone 5477 C ≈ #3E5D58 ===== */
+:root{--pri:#3e5d58;--pri2:#26403b;--bg:#eef2f1}
+header{background:linear-gradient(135deg,#26403b,#3e5d58)!important;box-shadow:0 4px 20px rgba(38,64,59,.35)!important}
+.btn.p{background:#3e5d58;box-shadow:0 6px 16px rgba(62,93,88,.35)}
+.bigcam,.fab{background:linear-gradient(135deg,#5f837c,#2f4a45)!important}
+.fab{box-shadow:0 10px 28px rgba(62,93,88,.5)!important}
+.bigcam{animation:pulse5477 2.2s infinite!important}
+@keyframes pulse5477{0%,100%{box-shadow:0 14px 34px rgba(62,93,88,.45),0 0 0 8px rgba(62,93,88,.15)}50%{box-shadow:0 14px 34px rgba(62,93,88,.45),0 0 0 22px rgba(62,93,88,0)}}
+input:focus,select:focus,textarea:focus{border-color:#3e5d58!important;box-shadow:0 0 0 4px rgba(62,93,88,.15)!important}
+.acard .ic{background:#e2ebe8!important;color:#3e5d58!important}
+.zc.on{background:#e2ebe8!important;border-color:#3e5d58!important;color:#26403b!important}
+.loc{color:#3e5d58!important}
+.step i{background:#3e5d58!important}
+.phempty{border-color:#9db6b0!important;background:#f0f5f3!important;color:#3e5d58!important}
+.th.on img{outline-color:#3e5d58!important}
+.isol,.isoauto{background:#eef4f2!important;border-color:#c5d6d1!important;color:#26403b!important}
+.chip.fs{background:#e2ebe8;color:#26403b}
+.rep .rh{background:#3e5d58!important}
+.rep .sum th,.rep table th{background:#e2ebe8!important}
+.rep h2,.rep h3{color:#26403b!important;border-color:#3e5d58!important}
+.rep .s.iso{background:#e2ebe8!important;color:#26403b!important}
 </style>
 </head>
 <body>
@@ -319,7 +340,34 @@ const ISO_RULES=[
  ['10.2',3,/повторн|не устранен|снова|опять|корректирующ|ранее выявлен/],
  ['6.1',2,/риск|опасност/]
 ];
-function detectIso(text){
+/* ---------- FSSC 22000 (санитарно-гигиенические аудиты) ---------- */
+const FSSC_RULES=[
+['4.10 Борьба с вредителями — ISO/TS 22002-4',['вредител','грызун','мыш','крыс','насеком','мух','моль','таракан','птиц','голуб','помет','приманк','ловушк','дератиз','дезинсек','инсект']],
+['4.11 Гигиена персонала и бытовые помещения — ISO/TS 22002-4',['перчат','спецодежд','халат','шапоч','головн','волос','бород','украшен','кольц','серьг','часы','бахил','руки','рукомойн','санузел','туалет','раздевал','курен','курит','сигарет','еда','еду','пищ','жвач','напит','бутылк','кофе','перекус']],
+['4.9 Очистка и санитарная обработка — ISO/TS 22002-4',['гряз','пыл','загрязн','уборк','не убра','мойк','чистк','моющ','дезинфек','санобработ','паутин','налет','луж','пятн','разлит']],
+['4.8 Предотвращение загрязнения (физического, химического) — ISO/TS 22002-4',['стекл','разбит','плафон','металл','скреп','стружк','посторонн предмет','посторонний предмет','нож','лезви','кнопк','болт','гайк','щеп','хрупк','капает','капл','конденсат','хими','химикат','масло на']],
+['4.5 Обращение с отходами — ISO/TS 22002-4',['отход','мусор','контейнер','урн','обрезк','макулатур','переполн']],
+['4.6 Пригодность, очистка и обслуживание оборудования — ISO/TS 22002-4',['оборудован','станок','станк','машин','ржав','корроз','неисправ','износ','ремонт','обслуживан','смазк','изолент','скотч']],
+['4.4 Инженерные системы (воздух, вода, освещение) — ISO/TS 22002-4',['вентиляц','вытяжк','кондиционер','сжат','воздух','вода','воды','освещ','свет','ламп']],
+['4.3 Здания, помещения и планировка — ISO/TS 22002-4',[' пол ',' полу',' полы','стен','потол','двер','ворот','окн','щел','дыр','трещин','протеч','протек','кровл','крыш','выбоин']],
+['4.14 Складирование и хранение — ISO/TS 22002-4',['склад','хран','паллет','поддон','на полу','у стен','стеллаж','штабел','пленк','без упаков','упаковк']],
+['4.7 Управление закупаемыми материалами — ISO/TS 22002-4',['сырь','краск','клей','лак','картон','бумаг','поставщ','входн']],
+['8.9.4 Обращение с потенциально небезопасной продукцией — ISO 22000',['брак','несоответствующ','изолир','отбрак']],
+['7.5 Документированная информация — ISO 22000',['журнал','запис','инструкц','чек-лист','чеклист','график','не заполн','документ']],
+['7.2 Компетентность — ISO 22000',['обучен','не знает','инструктаж','не обуч','квалификац']],
+['8.7 Управление мониторингом и измерениями — ISO 22000',['поверк','калибров','термометр','весы','гигрометр','прибор']],
+['Доп. требования FSSC 22000 — Защита продукции (food defense)',['посторонние','постороннего','пропуск','замок','не заперт','доступ','охран','пломб']]
+];
+const FSSC=FSSC_RULES.map(r=>r[0]);
+function detectFssc(t){
+ const s=' '+String(t||'').toLowerCase().replace(/ё/g,'е').replace(/[.,;:!?()«»"]/g,' ')+' ';
+ let best='',bs=0;
+ FSSC_RULES.forEach(([lab,kw])=>{const sc=kw.reduce((n,k)=>n+(s.includes(k)?1:0),0);if(sc>bs){bs=sc;best=lab}});
+ return best;
+}
+const isFssc=()=>!!(cur&&cur.type==='fssc');
+function detectIso(t){return isFssc()?detectFssc(t):detectIso9001(t)}
+function detectIso9001(text){
  const t=' '+String(text||'').toLowerCase().replace(/ё/g,'е')+' ';if(t.trim().length<3)return '';
  let best='',bs=0;
  ISO_RULES.forEach(([k,w,re])=>{const g=new RegExp(re.source.replace(/ё/g,'е'),'g');const m=t.match(g);if(m){const s=m.length*w;if(s>bs){bs=s;best=k}}});
@@ -417,7 +465,7 @@ function summaryView(L){
  ${zones.map(z=>{const[l,c]=level(z);return `<div class="zr"><div class="zr-h"><span class="t">${esc(z.name)}</span><span class="chip ${c}">${l}</span></div>
   ${bar(z,max)}<div class="mut" style="margin-top:6px">замечаний: ${z.total}</div></div>`}).join('')}
  ${LEGEND}</div>
- <div class="sec">Нарушения по пунктам ISO 9001</div><div class="card">
+ <div class="sec">Нарушения по пунктам стандарта</div><div class="card">
  ${isos.map(x=>`<div class="zr"><div class="zr-h"><span class="t" style="font-size:14px">${esc(x.name)}</span><span class="chip">${x.total}</span></div></div>`).join('')}</div>
  <div class="sec">Кому что делать</div>
  ${people.map((p,k)=>`<div class="card"><div class="ph-h"><div class="av">${esc(inits(p.name))}</div>
@@ -457,13 +505,14 @@ function auditCard(a){
  return `<div class="card acard" onclick="tab='list';audit('${a.id}')"><div class="ic"><b>${d.getDate()}</b>${MON[d.getMonth()]}</div>
  <div class="bd"><div class="t">${fmtDT(a.date)}</div><div class="mut">${esc(a.auditor||'—')}${a.note?' · '+esc(a.note):''}</div>
  <div class="row" style="gap:6px;margin-top:8px">${a.closed?'<span class="chip ok">завершён</span>':'<span class="chip a">в процессе</span>'}
- <span class="chip">${a.items.length} замеч.</span></div></div>
+ <span class="chip">${a.items.length} замеч.</span>${a.type==='fssc'?'<span class="chip fs">Санаудит · FSSC 22000</span>':'<span class="chip">ISO 9001</span>'}</div></div>
  <div class="chev">${ic('fwd')}</div></div>`;
 }
 
 /* ---------- Обход ---------- */
 function auditForm(a){
  modal(`<div class="sh-t">${a?'Параметры обхода':'Новый обход'}</div>
+ <div class="fld"><div class="lb">Вид аудита</div><select id="a_type"><option value="iso">Производственный обход (ISO 9001)</option><option value="fssc" ${a&&a.type==='fssc'?'selected':''}>Санитарно-гигиенический аудит (FSSC 22000)</option></select></div>
  <div class="fld"><div class="lb">Дата и время</div><input type="datetime-local" id="a_date" value="${a?a.date:nowLocal()}"></div>
  <div class="fld"><div class="lb">Проводит обход</div><input id="a_aud" list="pl2" value="${esc(a?a.auditor:(S.auditor||'руководитель ОК'))}" placeholder="руководитель ОК"><datalist id="pl2"><option value="руководитель ОК"></datalist></div>
  <div class="sfoot"><button class="btn" onclick="closeModal()">Отмена</button>
@@ -471,7 +520,7 @@ function auditForm(a){
 }
 async function saveAudit(edit){
  const a=edit?cur:{id:uid(),items:[],closed:false};
- a.date=$('#a_date').value||nowLocal();a.auditor=$('#a_aud').value.trim()||'руководитель ОК';a.note=a.note||'';
+ a.date=$('#a_date').value||nowLocal();a.auditor=$('#a_aud').value.trim()||'руководитель ОК';a.note=a.note||'';a.type=$('#a_type').value;
  if(!edit&&a.auditor&&a.auditor!==S.auditor){S.auditor=a.auditor;await setKV('settings',S)}
  await putAudit(a);closeModal();tab='list';audit(a.id);
 }
@@ -480,7 +529,7 @@ async function audit(id){
  refresh=()=>audit(id);
  const open=cur.items.filter(i=>i.status!=='done').length;
  const L=cur.items.map((i,k)=>({...i,_n:k+1,_aid:cur.id}));
- setHeader('Обход',fmtDT(cur.date),'home()');
+ setHeader(cur.type==='fssc'?'Санитарно-гигиенический аудит':'Обход',fmtDT(cur.date),'home()');
  setFab(!cur.closed&&cur.items.length>0);
  main.innerHTML=`<div class="card">
   <div class="row" style="justify-content:space-between;align-items:center">
@@ -508,7 +557,7 @@ function itemCard(i,n,aid,extra=''){
  <div class="bd" onclick="${ed}">
   <div class="loc">${ic('pin')}<span>${esc(locText(i))}</span></div>
   <div class="cmt">${esc(i.desc)||'<span class="mut">без комментария</span>'}</div>
-  ${i.iso?`<div class="isol">ISO 9001 · п. ${esc(i.iso)}</div>`:''}
+  ${i.iso?`<div class="isol">${esc(i.std||'ISO 9001')} · п. ${esc(i.iso)}</div>`:''}
   <div class="meta"><span class="chip">${ic('user')}${esc(respText(i)||'не назначен')}</span>
   ${extra}</div></div>
  <div class="act"><button class="btn sm ${done?'':'g'}" onclick="toggleItem('${aid}','${i.id}')">${done?ic('undo')+' Вернуть в работу':ic('check')+' Устранено'}</button></div></div>`;
@@ -562,7 +611,7 @@ function itemSheet(isEdit){
  <div class="step"><i>3</i>Что не так</div>
  <div class="vwrap"><textarea id="f_desc" placeholder="Опишите несоответствие или нажмите 🎤 и продиктуйте">${esc(draft.desc)}</textarea>
  <button type="button" class="mic" id="micBtn" onclick="toggleMic()" title="Голосовой ввод" aria-label="Голосовой ввод"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button></div>
- <div class="step"><i>4</i>Пункт ISO 9001 (нарушение стандарта)</div>
+ <div class="step"><i>4</i>Пункт ${isFssc()?'FSSC 22000':'ISO 9001'} (нарушение стандарта)</div>
  <div class="isoauto" id="isoAuto"></div>
  <div id="isoManual" style="display:${draft.isoManual?'':'none'}">${isoSel()}</div>
  <button type="button" class="isolink" id="isoLink" onclick="isoToggle()">${draft.isoManual?'↺ Определять автоматически':'✎ Исправить вручную'}</button>
@@ -611,7 +660,7 @@ function setResp(id,val){const s=$('#'+id);if(!s)return;
 function getResp(id){const v=$('#'+id).value;if(v!=='__new')return v;
  const t=$('#'+id+'_new').value.trim();if(t&&!S.people.includes(t)){S.people.push(t);setKV('settings',S)}return t}
 function isoSel(){
- const v=(draft&&draft.iso)||'',L=[...ISO,...(S.isoCustom||[])];if(v&&!L.includes(v))L.push(v);
+ const v=(draft&&draft.iso)||'',L=[...(isFssc()?FSSC:ISO),...(S.isoCustom||[])];if(v&&!L.includes(v))L.push(v);
  return `<select id="f_iso" onchange="isoChg()"><option value="">— не выбран —</option>${L.map(p=>`<option ${p===v?'selected':''}>${esc(p)}</option>`).join('')}<option value="__new">＋ Другой пункт…</option></select>`+
   `<input id="f_iso_new" placeholder="Например: 7.1.3 Инфраструктура" style="display:none;margin-top:8px">`;
 }
@@ -639,7 +688,7 @@ function cancelNew(){if(confirm('Отменить это замечание? Ф�
 function saveItem(next){
  const oth=draft.zone==='Другое';
  if(oth&&!$('#f_other').value.trim()){$('#f_other').focus();return alert('Впишите, где обнаружено несоответствие')}
- Object.assign(draft,{place:oth?$('#f_other').value.trim():getPlace(),desc:$('#f_desc').value.trim(),resp:getResp('f_resp'),resp2:getResp('f_resp2'),iso:getIso()});
+ Object.assign(draft,{place:oth?$('#f_other').value.trim():getPlace(),desc:$('#f_desc').value.trim(),resp:getResp('f_resp'),resp2:getResp('f_resp2'),iso:getIso(),std:isFssc()?'FSSC 22000':'ISO 9001'});
  if(!draft.photos.length&&!draft.desc)return alert('Добавьте фото или комментарий');
  if(draft.status==='done')draft.doneAt=draft.doneAt||new Date().toISOString();else delete draft.doneAt;
  if(draft.zone)lastZone=draft.zone;
@@ -752,17 +801,17 @@ function issuesReport(){
 /* ---------- PDF ---------- */
 function auditReport(){
  if(!cur.items.length)return alert('В обходе пока нет замечаний');
- printReport({title:'Акт обхода производства',fname:'Обход_'+cur.date.slice(0,10)+'_'+cur.date.slice(11,16).replace(':','-'),
+ printReport({title:(cur.type==='fssc'?'Акт санитарно-гигиенического аудита (FSSC 22000)':'Акт обхода производства'),fname:'Обход_'+cur.date.slice(0,10)+'_'+cur.date.slice(11,16).replace(':','-'),
   info:[['Дата обхода',fmtDT(cur.date)],['Провёл',cur.auditor],['Примечание',cur.note]],items:cur.items,sign:cur.auditor||''});
 }
 function pdfCard(i,showAudit){
  const done=i.status==='done';
  return `<div class="f">
- <div class="fh"><span>№${i._n}</span>${i.iso?`<span class="s iso">ISO 9001 · п. ${esc(isoNum(i.iso))}</span>`:''}</div>
+ <div class="fh"><span>№${i._n}</span>${i.iso?`<span class="s iso">${esc(i.std||'ISO 9001')} · п. ${esc(isoNum(i.iso))}</span>`:''}</div>
  ${i.photos.length?`<div class="rph ${i.photos.length>1?'m':''}">${i.photos.map(p=>`<img src="${p}">`).join('')}</div>`:''}
  <div class="fl"><div class="lb">Местоположение</div><div class="lv">${esc(locText(i))}</div></div>
  <div class="fl"><div class="lb">Что не так</div><div class="lv c">${esc(i.desc).replace(/\n/g,'<br>')||'—'}</div></div>
- <div class="fl"><div class="lb">Пункт ISO 9001 (нарушение стандарта)</div><div class="lv c">${esc(i.iso||'не указан')}</div></div>
+ <div class="fl"><div class="lb">Пункт ${esc(i.std||'ISO 9001')} (нарушение стандарта)</div><div class="lv c">${esc(i.iso||'не указан')}</div></div>
  <div class="fm"><div><div class="lb">Ответственный</div>${esc(respText(i)||'не назначен')}</div>
   ${showAudit&&i._a?`<div><div class="lb">Обход</div>${fmtDT(i._a).slice(0,10)}</div>`:''}</div>
  ${i.fixNote?`<div class="fl"><div class="lb">Устранение</div><div class="lv c">${esc(i.fixNote)}</div></div>`:''}</div>`;
@@ -786,7 +835,7 @@ function printReport({title,fname,info,items,sign,showAudit}){
   ${zones.map(z=>{const[l,c]=level(z);return `<tr><td><b>${esc(z.name)}</b></td><td><span class="s ${c}">${l}</span></td>
    <td class="n">${z.total}</td><td>${bar(z,maxZ)}</td></tr>`}).join('')}</table>
   ${LEGEND}
-  <h3>Нарушения по пунктам ISO 9001</h3>
+  <h3>Нарушения по пунктам стандарта</h3>
   <table class="zt"><tr><th>Пункт ISO 9001</th><th>Замечаний</th></tr>${isos.map(x=>`<tr><td>${esc(x.name)}</td><td class="n">${x.total}</td></tr>`).join('')}</table>
   <h3>Кому что делать</h3>
   ${people.map(p=>`<div class="pb"><div class="pbh"><span>${esc(p.name)}</span>
@@ -1117,6 +1166,8 @@ function importBackup(){
   ['ССиМ','СГП'].forEach(n=>{if(!S.places.some(p=>p.zone===n&&p.name===n))S.places.push({zone:n,name:n})});
   S.addPlaces7=true;await setKV('settings',S);
  }
+ if(!S.co1){S.company='ММПОФ';S.co1=true;await setKV('settings',S)}
+ document.querySelectorAll('meta[name=theme-color]').forEach(m=>m.content='#3e5d58');
  navigator.storage?.persist?.();
  window.addEventListener('afterprint',()=>document.title='Обходы производства');
  home();
