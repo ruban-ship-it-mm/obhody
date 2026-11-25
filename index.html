@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Обходы производства. Для размещения на сайте переименуйте файл в index.html -->
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -144,6 +145,13 @@ background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;box-shadow:0 10px 
 input,select,textarea{width:100%;font:inherit;font-size:16px;padding:13px 14px;border-radius:14px;border:1.5px solid var(--line);background:#f8fafc;color:var(--txt);outline:none}
 input:focus,select:focus,textarea:focus{border-color:var(--pri);background:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.12)}
 textarea{min-height:100px;resize:vertical}
+.vwrap{position:relative}
+.vwrap textarea{padding-right:64px;min-height:120px}
+.mic{position:absolute;right:10px;bottom:12px;width:46px;height:46px;border-radius:50%;border:0;background:var(--pri);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 12px rgba(37,99,235,.35)}
+.mic svg{width:22px;height:22px}
+.mic:active{transform:scale(.94)}
+.mic.rec{background:var(--red);animation:micp 1.2s infinite}
+@keyframes micp{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.55)}50%{box-shadow:0 0 0 14px rgba(220,38,38,0)}}
 .lb{font-size:12px;color:var(--mut);margin:0 0 5px 4px;font-weight:700}
 .fld{margin-top:14px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -303,7 +311,35 @@ function setHeader(title,sub,back){
 const setFab=show=>{$('#fab').hidden=!show};
 function modal(html){closeModal();const m=document.createElement('div');m.className='ov';
  m.innerHTML=`<div class="sheet"><div class="handle"></div>${html}</div>`;document.body.append(m);return m}
-const closeModal=()=>document.querySelector('.ov')?.remove();
+const closeModal=()=>{stopMic();document.querySelector('.ov')?.remove()};
+
+/* ---------- Голосовой ввод ---------- */
+let rec=null;
+function stopMic(){if(rec){const r=rec;rec=null;try{r.abort()}catch(_){}}document.getElementById('micBtn')?.classList.remove('rec')}
+function toggleMic(){
+ if(rec){const r=rec;try{r.stop()}catch(_){stopMic()}return}
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ const ta=$('#f_desc'),btn=$('#micBtn');
+ if(!SR){alert('Голосовой ввод не поддерживается в этом браузере.\n\nНажмите в поле и используйте значок микрофона 🎤 на клавиатуре телефона.');ta.focus();return}
+ const base=ta.value.replace(/\s+$/,'');
+ const r=new SR();rec=r;
+ r.lang='ru-RU';r.continuous=true;r.interimResults=true;r.maxAlternatives=1;
+ r.onresult=e=>{
+  let t='';for(let k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;
+  t=t.trim();
+  if(t&&(!base||/[.!?]$/.test(base)))t=t.charAt(0).toUpperCase()+t.slice(1);
+  ta.value=base?(t?base+' '+t:base):t;
+  ta.scrollTop=ta.scrollHeight;
+ };
+ r.onerror=e=>{
+  if(e.error==='not-allowed'||e.error==='service-not-allowed')alert('Нет доступа к микрофону.\n\niPhone: Настройки → Safari → Микрофон → «Разрешить».\nAndroid: значок замка в адресной строке → Микрофон → «Разрешить».\n\nМожно также использовать микрофон 🎤 на клавиатуре.');
+  else if(e.error==='network')toast('Нет интернета — распознавание недоступно');
+  else if(e.error!=='no-speech'&&e.error!=='aborted')toast('Ошибка распознавания: '+e.error);
+ };
+ r.onend=()=>{if(rec===r){rec=null;document.getElementById('micBtn')?.classList.remove('rec');toast('Запись остановлена')}};
+ try{r.start();btn.classList.add('rec');toast('Говорите… Нажмите ещё раз, чтобы остановить')}
+ catch(err){rec=null;alert('Не удалось включить микрофон: '+err.message)}
+}
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1800)}
 
 function compress(file,max=1400,q=0.72){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);
@@ -482,7 +518,8 @@ function itemSheet(isEdit){
  <div id="othBox" style="display:${isOth?'':'none'}"><div class="lb" style="margin-top:14px">Где это?</div>
  <input id="f_other" placeholder="Например: склад сырья, ворота 2; столовая; лестница 3 этаж…" value="${isOth?esc(draft.place||''):''}"></div>
  <div class="step"><i>3</i>Что не так</div>
- <textarea id="f_desc" placeholder="Опишите несоответствие и что нужно сделать">${esc(draft.desc)}</textarea>
+ <div class="vwrap"><textarea id="f_desc" placeholder="Опишите несоответствие или нажмите 🎤 и продиктуйте">${esc(draft.desc)}</textarea>
+ <button type="button" class="mic" id="micBtn" onclick="toggleMic()" title="Голосовой ввод" aria-label="Голосовой ввод"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button></div>
  <div class="step"><i>4</i>Кто и когда исправляет</div>
  <div><div class="lb">Ответственный</div>${respSel('f_resp',draft.resp)}</div>
  <div class="fld"><div class="lb">Второй ответственный (необязательно)</div>${respSel('f_resp2',draft.resp2||'')}</div>
@@ -970,6 +1007,14 @@ function importBackup(){
   const z=S.zones.find(x=>x.name==='Спецсклейка');
   if(z&&!z.resp)z.resp='руководитель департамента склейки';
   S.fixSpec1=true;await setKV('settings',S);
+ }
+ if(!S.addZones6){
+  [['СГП','руководитель СГП'],['ССиМ','руководитель ССиМ']].forEach(([n,r])=>{
+   const z=S.zones.find(x=>x.name===n);
+   if(z){if(!z.resp)z.resp=r}else S.zones.push({name:n,resp:r});
+   if(!S.people.includes(r))S.people.push(r);
+  });
+  S.addZones6=true;await setKV('settings',S);
  }
  navigator.storage?.persist?.();
  window.addEventListener('afterprint',()=>document.title='Обходы производства');
