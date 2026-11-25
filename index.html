@@ -145,6 +145,13 @@ background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;box-shadow:0 10px 
 input,select,textarea{width:100%;font:inherit;font-size:16px;padding:13px 14px;border-radius:14px;border:1.5px solid var(--line);background:#f8fafc;color:var(--txt);outline:none}
 input:focus,select:focus,textarea:focus{border-color:var(--pri);background:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.12)}
 textarea{min-height:100px;resize:vertical}
+.icard .st,.act{display:none}
+.isol{display:inline-block;margin:-4px 0 12px;font-size:13px;font-weight:700;color:#3730a3;background:#eef2ff;border-radius:10px;padding:6px 10px}
+.isohint{font-size:12px;color:var(--mut);margin-top:6px;line-height:1.4}
+.rep .s.iso{background:#e0e7ff;color:#1e3a8a}
+.isoauto{display:flex;gap:10px;align-items:center;background:#eef2ff;border:1.5px solid #c7d2fe;border-radius:14px;padding:12px 14px;font-size:15px;color:var(--pri2)}
+.isotag{flex:none;background:var(--pri);color:#fff;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;border-radius:8px;padding:3px 8px}
+.isolink{margin-top:8px;background:none;border:0;padding:4px 2px;color:var(--pri);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .vwrap{position:relative}
 .vwrap textarea{padding-right:64px;min-height:120px}
 .mic{position:absolute;right:10px;bottom:12px;width:46px;height:46px;border-radius:50%;border:0;background:var(--pri);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 12px rgba(37,99,235,.35)}
@@ -288,7 +295,36 @@ const fmtDT=s=>s?new Date(s).toLocaleString('ru-RU',{day:'2-digit',month:'2-digi
 const fmtD=s=>s?new Date(s+'T00:00').toLocaleDateString('ru-RU'):'без срока';
 const MON=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
 const PR={1:'Низкий',2:'Средний',3:'Высокий'};
-const isOver=i=>!!(i.status!=='done'&&i.deadline&&i.deadline<today());
+const isOver=()=>false;
+const ISO=['4.4 Система менеджмента качества и её процессы','5.1.2 Ориентация на потребителя','6.1 Действия в отношении рисков и возможностей','7.1.3 Инфраструктура','7.1.4 Среда для функционирования процессов','7.1.5 Ресурсы для мониторинга и измерения','7.2 Компетентность','7.3 Осведомлённость','7.4 Обмен информацией','7.5.3 Управление документированной информацией','8.1 Планирование и управление деятельностью','8.4 Управление процессами, продукцией и услугами внешних поставщиков','8.5.1 Управление производством продукции','8.5.2 Идентификация и прослеживаемость','8.5.3 Собственность потребителей или внешних поставщиков','8.5.4 Сохранение','8.5.6 Управление изменениями','8.6 Выпуск продукции и услуг','8.7 Управление несоответствующими результатами процессов','9.1 Мониторинг, измерение, анализ и оценка','10.2 Несоответствия и корректирующие действия','10.3 Постоянное улучшение'];
+const isoNum=s=>(String(s).match(/^[\d.]+/)||[s])[0];
+/* ---------- Автоопределение пункта ISO 9001 по описанию ---------- */
+const ISO_RULES=[
+ ['8.7',3,/брак|бракован|отбраков|дефект|несоответствующ\S* (продукц|издел|материал)|не изолир|изолятор|некондиц|забракова/],
+ ['8.5.2',3,/ярлык|маркир|этикет|бирк|не подписан|без подпис|не идентифиц|идентификац|прослежив|без опознават|паспорт парти|номер парти|статус продукц|неизвестн\S* (продукц|материал|парти)/],
+ ['8.5.4',2,/хранен|на полу|упаковк|упакова|стретч|паллет|поддон|штабел|намок|намоч|сырост|влаг|под дожд|складир|заваливает|деформир|помят|порван|повреждени\S* (продукц|издел|короб|тар)|без укрыт|не укрыт|пыль на (продукц|издел)|загрязн\S* (продукц|издел|материал)/],
+ ['7.1.4',2,/беспоряд|захлам|загромо|мусор|грязь|грязн|разметк|разметка|не убран|уборк|чистот|порядок|5s|5с|посторонн\S* предмет|разбросан|валяется|лежат? на проход|проход|освещен|темно|шум|сквозняк|жарко|холодно|температур\S* в цех|запах|си(з|з )|перчат|каск|спецодежд|огнетуш/],
+ ['7.1.3',2,/неисправ|сломан|слома|поломк|не работает|не работают|протечк|протека|течь|течёт|течет|утечк|подтек|масло|ремонт|изношен|износ|трещин|выбоин|повреждени\S* пол|пол поврежд|ограждени|кожух|оборудовани|станок|станка|конвейер|вентиляц|кондиционер|лампа|розетк|провод|кабел|крыша|кровл|стен|двер|ворот/],
+ ['7.1.5',3,/поверк|поверен|калибр|весы|весов|измерител|прибор|штанген|микрометр|манометр|термометр|рулетк|линейк|денситометр|спектрофотометр|си без/],
+ ['8.5.1',3,/не по техкарт|не по технолог|нарушени\S* технолог|технологическ\S* (режим|процесс|дисциплин)|режим|параметр|не соблюда|рецептур|наладк|настройк|скорост|не по (инструкц|стандарт)|без контрол\S* перв|перв\S* оттиск|приладк/],
+ ['7.5.3',2,/инструкц|документ|техкарт|технологическ\S* карт|журнал|запис|бланк|устаревш|старая версия|неактуал|не заполн|заполнен|чек-лист|чеклист|стандарт рабоч|соп|регламент|схем|не утвержд/],
+ ['7.2',3,/обучен|не обучен|квалификац|допуск|аттестац|стажер|стажёр|компетент/],
+ ['7.3',3,/не знает|не знал|не знают|не осведомл|осведомл|не ознаком|не в курсе|политик\S* (в области )?качеств|цели в области/],
+ ['7.4',2,/информационн\S* стенд|стенд|не сообщ|не передал|не доведен|обмен информ|коммуникац|не проинформ/],
+ ['8.4',3,/поставщик|входн\S* контрол|сырь\S* не провер|закупк|закупленн/],
+ ['8.5.3',3,/давальческ|собственност\S* (потребит|заказч)|имуществ\S* заказч|клише заказч|форм\S* заказч|материал\S* заказч/],
+ ['8.5.6',3,/изменени\S* без|без согласован|самовольн|не согласован/],
+ ['8.6',3,/отгруж|отгрузк|выпуск продукц|приемк|приёмк|отк|контрол\S* качества не|без проверк\S* отк/],
+ ['9.1',2,/не контролир|не провод\S* контрол|не измеря|мониторинг|не провер/],
+ ['10.2',3,/повторн|не устранен|снова|опять|корректирующ|ранее выявлен/],
+ ['6.1',2,/риск|опасност/]
+];
+function detectIso(text){
+ const t=' '+String(text||'').toLowerCase().replace(/ё/g,'е')+' ';if(t.trim().length<3)return '';
+ let best='',bs=0;
+ ISO_RULES.forEach(([k,w,re])=>{const g=new RegExp(re.source.replace(/ё/g,'е'),'g');const m=t.match(g);if(m){const s=m.length*w;if(s>bs){bs=s;best=k}}});
+ return best?(ISO.find(x=>isoNum(x)===best)||best):'';
+}
 const zoneResp=z=>(S.zones.find(x=>x.name===z)||{}).resp||'';
 const respList=i=>[i.resp,i.resp2].filter(Boolean);
 const respText=i=>respList(i).join(', ');
@@ -330,6 +366,7 @@ function toggleMic(){
   if(t&&(!base||/[.!?]$/.test(base)))t=t.charAt(0).toUpperCase()+t.slice(1);
   ta.value=base?(t?base+' '+t:base):t;
   ta.scrollTop=ta.scrollHeight;
+  updIso();
  };
  r.onerror=e=>{
   if(e.error==='not-allowed'||e.error==='service-not-allowed')alert('Нет доступа к микрофону.\n\niPhone: Настройки → Safari → Микрофон → «Разрешить».\nAndroid: значок замка в адресной строке → Микрофон → «Разрешить».\n\nМожно также использовать микрофон 🎤 на клавиатуре.');
@@ -362,30 +399,34 @@ function summarize(items){
  const people=[...P.values()].map(p=>{p.items.sort((a,b)=>dn(a)-dn(b)||isOver(b)-isOver(a)||(b.priority||2)-(a.priority||2)||
    (a.deadline||'9999').localeCompare(b.deadline||'9999')||a._n-b._n);return p})
   .sort((a,b)=>(a.name==='Не назначен')-(b.name==='Не назначен')||b.open-a.open||b.items.length-a.items.length);
- const zones=[...Z.values()].sort((a,b)=>(b.hi+b.over>0)-(a.hi+a.over>0)||b.open-a.open||b.hi-a.hi||b.total-a.total);
- return {zones,people};
+ const zones=[...Z.values()].sort((a,b)=>b.total-a.total);
+ const IM=new Map();items.forEach(i=>{const k=i.iso||'Не указан';IM.set(k,(IM.get(k)||0)+1)});
+ const isos=[...IM.entries()].map(([name,total])=>({name,total})).sort((a,b)=>(a.name==='Не указан')-(b.name==='Не указан')||b.total-a.total);
+ return {zones,people,isos};
 }
-const level=z=>z.hi||z.over?['Критично','o']:z.open?['Требует внимания','a']:['В норме','ok'];
+const level=z=>z.total>=5?['Критично','o']:z.total>=2?['Требует внимания','a']:['Единичное','ok'];
 const bar=(z,max)=>`<div class="track"><div class="bar" style="width:${Math.max(4,z.total/max*100)}%">
- <i class="h" style="flex:${z.hi}"></i><i class="m" style="flex:${z.open-z.hi}"></i><i class="d" style="flex:${z.done}"></i></div></div>`;
-const LEGEND='<div class="legend"><span><i style="background:#dc2626"></i>открыто, высокий приоритет</span><span><i style="background:#f59e0b"></i>открыто</span><span><i style="background:#16a34a"></i>устранено</span></div>';
+ <i class="m" style="flex:1"></i></div></div>`;
+const LEGEND='<div class="legend">Оценка зоны по числу замечаний: 1 — единичное, 2–4 — требует внимания, 5 и более — критично</div>';
 
 function summaryView(L){
  if(!L.length)return '<div class="card mut" style="text-align:center">Нет данных для итогов</div>';
- const {zones,people}=summarize(L),max=Math.max(1,...zones.map(z=>z.total));
+ const {zones,people,isos}=summarize(L),max=Math.max(1,...zones.map(z=>z.total));
  lastPeople=people;
  return `<div class="sec">Градация по зонам</div><div class="card">
  ${zones.map(z=>{const[l,c]=level(z);return `<div class="zr"><div class="zr-h"><span class="t">${esc(z.name)}</span><span class="chip ${c}">${l}</span></div>
-  ${bar(z,max)}<div class="mut" style="margin-top:6px">всего ${z.total} · открыто ${z.open}${z.hi?' · высокий '+z.hi:''}${z.over?' · просрочено '+z.over:''}</div></div>`}).join('')}
+  ${bar(z,max)}<div class="mut" style="margin-top:6px">замечаний: ${z.total}</div></div>`}).join('')}
  ${LEGEND}</div>
+ <div class="sec">Нарушения по пунктам ISO 9001</div><div class="card">
+ ${isos.map(x=>`<div class="zr"><div class="zr-h"><span class="t" style="font-size:14px">${esc(x.name)}</span><span class="chip">${x.total}</span></div></div>`).join('')}</div>
  <div class="sec">Кому что делать</div>
  ${people.map((p,k)=>`<div class="card"><div class="ph-h"><div class="av">${esc(inits(p.name))}</div>
-  <div style="flex:1;min-width:0"><div class="t">${esc(p.name)}</div><div class="mut">открыто ${p.open} из ${p.items.length}${p.over?' · <b style="color:var(--red)">просрочено '+p.over+'</b>':''}</div></div>
+  <div style="flex:1;min-width:0"><div class="t">${esc(p.name)}</div><div class="mut">замечаний: ${p.items.length}</div></div>
   <button class="btn sm" onclick="personPdf(${k})">${ic('pdf')} PDF</button></div>
   ${p.items.map(i=>{const done=i.status==='done';return `<div class="pi ${done?'dn':''}" onclick="editIssue('${i._aid}','${i.id}')">
    ${i.photos[0]?`<img src="${i.photos[0]}" loading="lazy">`:'<div class="nf"></div>'}
    <div class="bd"><div class="t" style="font-size:14px">№${i._n} · ${esc(locText(i))}</div><div class="d">${esc(i.desc)||'—'}</div></div>
-   <span class="chip ${done?'ok':isOver(i)?'o':i.priority==3?'a':''}">${done?'✓ готово':fmtD(i.deadline)}</span></div>`}).join('')}</div>`).join('')}`;
+   ${i.iso?`<span class="chip">п. ${esc(isoNum(i.iso))}</span>`:''}</div>`}).join('')}</div>`).join('')}`;
 }
 function tabsHTML(){return `<div class="tabs"><button class="${tab==='list'?'on':''}" onclick="tab='list';refresh()">Замечания</button>
  <button class="${tab==='sum'?'on':''}" onclick="tab='sum';refresh()">Итоги</button></div>`}
@@ -399,14 +440,14 @@ function personPdf(k){
 async function home(){
  refresh=home;cur=null;tab='list';setFab(false);
  const list=(await getAll()).sort((a,b)=>b.date.localeCompare(a.date));
- let open=0,over=0;list.forEach(a=>a.items.forEach(i=>{if(i.status!=='done'){open++;if(isOver(i))over++}}));
+ let total=0;const zs=new Set();list.forEach(a=>a.items.forEach(i=>{total++;zs.add(i.zone||'Без зоны')}));
  setHeader('Обходы',S.company||'Производственный контроль');
  main.innerHTML=`<div class="stats">
   <div class="stat"><b>${list.length}</b><span>обходов</span></div>
-  <div class="stat a"><b>${open}</b><span>открыто</span></div>
-  <div class="stat r"><b>${over}</b><span>просрочено</span></div></div>
+  <div class="stat a"><b>${total}</b><span>замечаний</span></div>
+  <div class="stat r"><b>${zs.size}</b><span>зон с замечаниями</span></div></div>
  <button class="btn p big full" onclick="auditForm()">${ic('cam')} Начать обход</button>
- <button class="btn full" style="margin-top:10px" onclick="openIssues()">${ic('alert')} Открытые замечания ${open?`<span class="chip o">${open}</span>`:''}</button>
+ <button class="btn full" style="margin-top:10px" onclick="openIssues()">${ic('alert')} Все замечания ${total?`<span class="chip">${total}</span>`:''}</button>
  <button class="btn g full" style="margin-top:10px" onclick="excelExport('all')">${ic('xls')} Excel: контроль по всем обходам</button>
  <div class="sec">История обходов</div>
  ${list.length?list.map(auditCard).join(''):'<div class="card mut" style="text-align:center">Обходов пока нет.<br>Сначала заполните зоны и ответственных в настройках (кнопка справа вверху).</div>'}`;
@@ -416,7 +457,7 @@ function auditCard(a){
  return `<div class="card acard" onclick="tab='list';audit('${a.id}')"><div class="ic"><b>${d.getDate()}</b>${MON[d.getMonth()]}</div>
  <div class="bd"><div class="t">${fmtDT(a.date)}</div><div class="mut">${esc(a.auditor||'—')}${a.note?' · '+esc(a.note):''}</div>
  <div class="row" style="gap:6px;margin-top:8px">${a.closed?'<span class="chip ok">завершён</span>':'<span class="chip a">в процессе</span>'}
- <span class="chip">${a.items.length} замеч.</span>${open?`<span class="chip o">открыто ${open}</span>`:''}${over?`<span class="chip o">просрочено ${over}</span>`:''}</div></div>
+ <span class="chip">${a.items.length} замеч.</span></div></div>
  <div class="chev">${ic('fwd')}</div></div>`;
 }
 
@@ -445,7 +486,7 @@ async function audit(id){
   <div class="row" style="justify-content:space-between;align-items:center">
    <div><div class="t">${esc(cur.auditor||'—')}</div><div class="mut">${cur.note?esc(cur.note):'проводит обход'}</div></div>
    ${cur.closed?'<span class="chip ok">завершён</span>':'<span class="chip a">в процессе</span>'}</div>
-  <div class="mini"><div><b>${cur.items.length}</b>замечаний</div><div><b>${open}</b>открыто</div><div><b>${cur.items.length-open}</b>устранено</div></div>
+  <div class="mini"><div><b>${cur.items.length}</b>замечаний</div><div><b>${new Set(L.map(i=>i.zone||'Без зоны')).size}</b>зон</div><div><b>${cur.items.length?new Set(L.flatMap(respOrNone)).size:0}</b>ответственных</div></div>
   <div class="row">
    <button class="btn p" style="flex:1" onclick="auditReport()">${ic('pdf')} PDF</button>
    <button class="btn g" style="flex:1" onclick="excelExport('audit')">${ic('xls')} Excel</button>
@@ -467,8 +508,9 @@ function itemCard(i,n,aid,extra=''){
  <div class="bd" onclick="${ed}">
   <div class="loc">${ic('pin')}<span>${esc(locText(i))}</span></div>
   <div class="cmt">${esc(i.desc)||'<span class="mut">без комментария</span>'}</div>
+  ${i.iso?`<div class="isol">ISO 9001 · п. ${esc(i.iso)}</div>`:''}
   <div class="meta"><span class="chip">${ic('user')}${esc(respText(i)||'не назначен')}</span>
-  <span class="chip ${over?'o':''}">${ic('cal')}${fmtD(i.deadline)}</span>${extra}</div></div>
+  ${extra}</div></div>
  <div class="act"><button class="btn sm ${done?'':'g'}" onclick="toggleItem('${aid}','${i.id}')">${done?ic('undo')+' Вернуть в работу':ic('check')+' Устранено'}</button></div></div>`;
 }
 async function toggleClose(){
@@ -520,20 +562,21 @@ function itemSheet(isEdit){
  <div class="step"><i>3</i>Что не так</div>
  <div class="vwrap"><textarea id="f_desc" placeholder="Опишите несоответствие или нажмите 🎤 и продиктуйте">${esc(draft.desc)}</textarea>
  <button type="button" class="mic" id="micBtn" onclick="toggleMic()" title="Голосовой ввод" aria-label="Голосовой ввод"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button></div>
- <div class="step"><i>4</i>Кто и когда исправляет</div>
+ <div class="step"><i>4</i>Пункт ISO 9001 (нарушение стандарта)</div>
+ <div class="isoauto" id="isoAuto"></div>
+ <div id="isoManual" style="display:${draft.isoManual?'':'none'}">${isoSel()}</div>
+ <button type="button" class="isolink" id="isoLink" onclick="isoToggle()">${draft.isoManual?'↺ Определять автоматически':'✎ Исправить вручную'}</button>
+ <div class="step"><i>5</i>Кто исправляет</div>
  <div><div class="lb">Ответственный</div>${respSel('f_resp',draft.resp)}</div>
  <div class="fld"><div class="lb">Второй ответственный (необязательно)</div>${respSel('f_resp2',draft.resp2||'')}</div>
- <div class="fld"><div class="lb">Срок</div><input type="date" id="f_dl" value="${draft.deadline||''}"></div>
- <details ${isEdit?'open':''}><summary>Приоритет, статус, устранение</summary>
-  <div class="grid2"><div><div class="lb">Приоритет</div><select id="f_pr">${[1,2,3].map(p=>`<option value="${p}" ${draft.priority==p?'selected':''}>${PR[p]}</option>`).join('')}</select></div>
-  <div><div class="lb">Статус</div><select id="f_st"><option value="open">Открыто</option><option value="done" ${draft.status==='done'?'selected':''}>Устранено</option></select></div></div>
-  <div class="fld"><div class="lb">Комментарий по устранению</div><input id="f_fix" value="${esc(draft.fixNote||'')}"></div></details>
  <div class="sfoot">${isEdit
   ?`<button class="btn ib d" onclick="deleteItem('${draft.id}')">${ic('trash')}</button><button class="btn" onclick="closeModal()">Отмена</button>
     <button class="btn p" style="flex:1" onclick="saveItem(false)">${ic('check')} Сохранить</button>`
   :`<button class="btn ib" onclick="cancelNew()">${ic('x')}</button><button class="btn" style="flex:1" onclick="saveItem(false)">${ic('check')} Готово</button>
     <button class="btn p" style="flex:1.5" onclick="saveItem(true)">${ic('cam')} Следующее фото</button>`}</div>`);
  renderShots();
+ $('#f_desc').addEventListener('input',updIso);
+ updIso();
 }
 function renderShots(){
  const p=draft.photos;
@@ -552,7 +595,8 @@ function selZone(el){
  document.querySelectorAll('.zc').forEach(b=>b.classList.toggle('on',b.dataset.z===draft.zone));
  const oth=draft.zone==='Другое';$('#othBox').style.display=oth?'':'none';$('#placeBox').style.display=oth?'none':'';
  if(oth){setTimeout(()=>$('#f_other').focus(),50);return}
- const ps=$('#f_place_sel'),pv=ps.value;ps.innerHTML=placeOptions(draft.zone,pv&&pv!=='__new'&&placesFor(draft.zone).includes(pv)?pv:'');placeSel();
+ const ps=$('#f_place_sel'),pv=ps.value,pl=placesFor(draft.zone);
+ ps.innerHTML=placeOptions(draft.zone,pv&&pv!=='__new'&&pl.includes(pv)?pv:(draft.zone&&pl.length===1?pl[0]:''));placeSel();
  const r=$('#f_resp');if(!r.value||r.value===prev)setResp('f_resp',zoneResp(draft.zone));
 }
 function respSel(id,val){
@@ -566,12 +610,36 @@ function setResp(id,val){const s=$('#'+id);if(!s)return;
  s.value=val||'';respChg(id)}
 function getResp(id){const v=$('#'+id).value;if(v!=='__new')return v;
  const t=$('#'+id+'_new').value.trim();if(t&&!S.people.includes(t)){S.people.push(t);setKV('settings',S)}return t}
+function isoSel(){
+ const v=(draft&&draft.iso)||'',L=[...ISO,...(S.isoCustom||[])];if(v&&!L.includes(v))L.push(v);
+ return `<select id="f_iso" onchange="isoChg()"><option value="">— не выбран —</option>${L.map(p=>`<option ${p===v?'selected':''}>${esc(p)}</option>`).join('')}<option value="__new">＋ Другой пункт…</option></select>`+
+  `<input id="f_iso_new" placeholder="Например: 7.1.3 Инфраструктура" style="display:none;margin-top:8px">`;
+}
+function updIso(){
+ const box=$('#isoAuto');if(!box)return;
+ if(draft.isoManual){box.style.display='none';return}
+ box.style.display='';
+ const d=detectIso($('#f_desc').value);draft._isoAuto=d;
+ box.innerHTML=d?`<span class="isotag">авто</span><b>п. ${esc(d)}</b>`
+  :`<span class="isotag">авто</span><span class="mut">${$('#f_desc').value.trim()?'Не удалось определить — уточните описание или исправьте вручную':'Определится по тексту в «Что не так»'}</span>`;
+}
+function isoToggle(){
+ draft.isoManual=!draft.isoManual;
+ $('#isoManual').style.display=draft.isoManual?'':'none';
+ $('#isoLink').textContent=draft.isoManual?'↺ Определять автоматически':'✎ Исправить вручную';
+ if(draft.isoManual&&!$('#f_iso').value&&draft._isoAuto){$('#f_iso').value=draft._isoAuto}
+ updIso();
+}
+function isoChg(){const n=$('#f_iso_new'),on=$('#f_iso').value==='__new';n.style.display=on?'':'none';if(on)n.focus()}
+function getIso(){if(!draft.isoManual)return detectIso($('#f_desc').value);const v=$('#f_iso').value;if(v!=='__new')return v;
+ const t=$('#f_iso_new').value.trim();
+ if(t&&!ISO.includes(t)){S.isoCustom=S.isoCustom||[];if(!S.isoCustom.includes(t)){S.isoCustom.push(t);setKV('settings',S)}}
+ return t}
 function cancelNew(){if(confirm('Отменить это замечание? Фото не сохранится.')){closeModal();draft=null}}
 function saveItem(next){
  const oth=draft.zone==='Другое';
  if(oth&&!$('#f_other').value.trim()){$('#f_other').focus();return alert('Впишите, где обнаружено несоответствие')}
- Object.assign(draft,{place:oth?$('#f_other').value.trim():getPlace(),desc:$('#f_desc').value.trim(),resp:getResp('f_resp'),resp2:getResp('f_resp2'),
-  deadline:$('#f_dl').value,priority:+$('#f_pr').value,status:$('#f_st').value,fixNote:$('#f_fix').value.trim()});
+ Object.assign(draft,{place:oth?$('#f_other').value.trim():getPlace(),desc:$('#f_desc').value.trim(),resp:getResp('f_resp'),resp2:getResp('f_resp2'),iso:getIso()});
  if(!draft.photos.length&&!draft.desc)return alert('Добавьте фото или комментарий');
  if(draft.status==='done')draft.doneAt=draft.doneAt||new Date().toISOString();else delete draft.doneAt;
  if(draft.zone)lastZone=draft.zone;
@@ -658,13 +726,13 @@ window.addEventListener('resize',()=>{if($('#ann')){annFit()}});
 /* ---------- Открытые замечания ---------- */
 async function openIssues(){
  refresh=openIssues;setFab(false);
- const list=[];(await getAll()).forEach(a=>a.items.forEach(i=>{if(i.status!=='done')list.push({...i,_a:a.date,_aid:a.id})}));
+ const list=[];(await getAll()).forEach(a=>a.items.forEach(i=>{list.push({...i,_a:a.date,_aid:a.id})}));
  const resps=[...new Set(list.flatMap(respOrNone))].sort();
  const zones=[...new Set(list.map(i=>i.zone||'Без зоны'))].sort();
  lastIssues=list.filter(i=>(!fResp||respOrNone(i).includes(fResp))&&(!fZone||(i.zone||'Без зоны')===fZone))
-  .sort((a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999')||a._a.localeCompare(b._a))
+  .sort((a,b)=>b._a.localeCompare(a._a))
   .map((i,k)=>({...i,_n:k+1}));
- setHeader('Открытые замечания','по всем обходам','home()');
+ setHeader('Все замечания','по всем обходам','home()');
  main.innerHTML=`<div class="card"><div class="grid2">
   <select onchange="fResp=this.value;openIssues()"><option value="">Все ответственные</option>${resps.map(r=>`<option ${r===fResp?'selected':''}>${esc(r)}</option>`).join('')}</select>
   <select onchange="fZone=this.value;openIssues()"><option value="">Все зоны</option>${zones.map(z=>`<option ${z===fZone?'selected':''}>${esc(z)}</option>`).join('')}</select></div>
@@ -673,11 +741,11 @@ async function openIssues(){
   <button class="btn p" onclick="issuesReport()">${ic('pdf')} PDF</button></div></div>
  ${lastIssues.length?tabsHTML()+(tab==='sum'?summaryView(lastIssues)
   :lastIssues.map(i=>itemCard(i,i._n,i._aid,`<span class="chip">обход ${fmtDT(i._a).slice(0,10)}</span>`)).join(''))
-  :'<div class="card mut" style="text-align:center">Открытых замечаний нет 👍</div>'}`;
+  :'<div class="card mut" style="text-align:center">Замечаний пока нет</div>'}`;
 }
 function issuesReport(){
  if(!lastIssues.length)return alert('Нет замечаний для отчёта');
- printReport({title:'Перечень открытых замечаний',fname:'Открытые_замечания_'+today(),
+ printReport({title:'Перечень замечаний',fname:'Замечания_'+today(),
   info:[['На дату',new Date().toLocaleDateString('ru-RU')],['Ответственный',fResp||'все'],['Зона',fZone||'все']],items:lastIssues,showAudit:true});
 }
 
@@ -690,41 +758,43 @@ function auditReport(){
 function pdfCard(i,showAudit){
  const done=i.status==='done';
  return `<div class="f">
- <div class="fh"><span>№${i._n}</span><span>${i.priority==3?'<span class="s hi">ВЫСОКИЙ</span>':''}<span class="s ${done?'ok':'o'}">${done?'УСТРАНЕНО'+(i.doneAt?' '+new Date(i.doneAt).toLocaleDateString('ru-RU'):''):isOver(i)?'ПРОСРОЧЕНО':'ОТКРЫТО'}</span></span></div>
+ <div class="fh"><span>№${i._n}</span>${i.iso?`<span class="s iso">ISO 9001 · п. ${esc(isoNum(i.iso))}</span>`:''}</div>
  ${i.photos.length?`<div class="rph ${i.photos.length>1?'m':''}">${i.photos.map(p=>`<img src="${p}">`).join('')}</div>`:''}
  <div class="fl"><div class="lb">Местоположение</div><div class="lv">${esc(locText(i))}</div></div>
  <div class="fl"><div class="lb">Что не так</div><div class="lv c">${esc(i.desc).replace(/\n/g,'<br>')||'—'}</div></div>
+ <div class="fl"><div class="lb">Пункт ISO 9001 (нарушение стандарта)</div><div class="lv c">${esc(i.iso||'не указан')}</div></div>
  <div class="fm"><div><div class="lb">Ответственный</div>${esc(respText(i)||'не назначен')}</div>
-  <div><div class="lb">Срок</div>${fmtD(i.deadline)}</div><div><div class="lb">Приоритет</div>${PR[i.priority]||'—'}</div>
   ${showAudit&&i._a?`<div><div class="lb">Обход</div>${fmtDT(i._a).slice(0,10)}</div>`:''}</div>
  ${i.fixNote?`<div class="fl"><div class="lb">Устранение</div><div class="lv c">${esc(i.fixNote)}</div></div>`:''}</div>`;
 }
 function printReport({title,fname,info,items,sign,showAudit}){
  const L=items.map((i,k)=>({...i,_n:i._n||k+1}));
  const open=L.filter(i=>i.status!=='done').length,over=L.filter(isOver).length;
- const {zones,people}=summarize(L),maxZ=Math.max(1,...zones.map(z=>z.total));
+ const {zones,people,isos}=summarize(L),maxZ=Math.max(1,...zones.map(z=>z.total));
  const st=i=>i.status==='done'?'<span class="s ok">устранено</span>':isOver(i)?'<span class="s o">просрочено</span>':'<span class="s a">открыто</span>';
  $('#print').innerHTML=`<div class="rep">
  <div class="rh"><div><div class="rt">${esc(title)}</div>${S.company?`<div>${esc(S.company)}</div>`:''}</div>
   <div class="rn">${L.length}<span>замечаний</span></div></div>
  <table class="info">${info.filter(r=>r[1]).map(r=>`<tr><td>${esc(r[0])}:</td><td><b>${esc(r[1])}</b></td></tr>`).join('')}
-  <tr><td>Статус:</td><td><b>открыто ${open}</b>, устранено ${L.length-open}${over?`, <b style="color:#b91c1c">просрочено ${over}</b>`:''}</td></tr>
+  <tr><td>Зон с замечаниями:</td><td><b>${zones.length}</b></td></tr>
   <tr><td>Итоги:</td><td>градация по зонам и задания по ответственным — в конце документа</td></tr></table>
  ${L.map(i=>pdfCard(i,showAudit)).join('')}
  <div class="sp">
-  <div class="rh"><div><div class="rt">Итоги</div><div>градация по зонам и распределение задач</div></div><div class="rn">${open}<span>открыто</span></div></div>
+  <div class="rh"><div><div class="rt">Итоги</div><div>градация по зонам и распределение задач</div></div><div class="rn">${L.length}<span>замечаний</span></div></div>
   <h3>Градация по зонам</h3>
-  <table class="zt"><tr><th>Зона</th><th>Оценка</th><th>Всего</th><th>Открыто</th><th>Высокий</th><th>Просроч.</th><th style="width:28%">Распределение</th></tr>
+  <table class="zt"><tr><th>Зона</th><th>Оценка</th><th>Замечаний</th><th style="width:40%">Распределение</th></tr>
   ${zones.map(z=>{const[l,c]=level(z);return `<tr><td><b>${esc(z.name)}</b></td><td><span class="s ${c}">${l}</span></td>
-   <td class="n">${z.total}</td><td class="n">${z.open}</td><td class="n">${z.hi||'—'}</td><td class="n">${z.over||'—'}</td><td>${bar(z,maxZ)}</td></tr>`}).join('')}</table>
+   <td class="n">${z.total}</td><td>${bar(z,maxZ)}</td></tr>`}).join('')}</table>
   ${LEGEND}
+  <h3>Нарушения по пунктам ISO 9001</h3>
+  <table class="zt"><tr><th>Пункт ISO 9001</th><th>Замечаний</th></tr>${isos.map(x=>`<tr><td>${esc(x.name)}</td><td class="n">${x.total}</td></tr>`).join('')}</table>
   <h3>Кому что делать</h3>
   ${people.map(p=>`<div class="pb"><div class="pbh"><span>${esc(p.name)}</span>
-   <span style="font-size:11px;font-weight:400">открыто ${p.open} из ${p.items.length}${p.over?' · просрочено '+p.over:''}${p.hi?' · высокий приоритет '+p.hi:''}</span></div>
-   <table class="pt"><tr><th>№</th><th>Фото</th><th>Место</th><th>Что не так</th><th>Срок</th><th>Статус</th>${showAudit?'<th>Обход</th>':''}<th class="chk">Отметка</th></tr>
-   ${p.items.map(i=>`<tr><td><b>${i._n}</b>${i.priority==3?'<br><span class="s hi" style="margin:3px 0 0">!</span>':''}</td>
+   <span style="font-size:11px;font-weight:400">замечаний: ${p.items.length}</span></div>
+   <table class="pt"><tr><th>№</th><th>Фото</th><th>Место</th><th>Что не так</th><th>Пункт ISO</th>${showAudit?'<th>Обход</th>':''}<th class="chk">Отметка</th></tr>
+   ${p.items.map(i=>`<tr><td><b>${i._n}</b></td>
     <td>${i.photos[0]?`<img src="${i.photos[0]}">`:''}</td><td>${esc(locText(i))}</td><td>${esc(i.desc)||'—'}</td>
-    <td>${fmtD(i.deadline)}</td><td>${st(i)}</td>${showAudit?`<td>${i._a?fmtDT(i._a).slice(0,10):''}</td>`:''}<td></td></tr>`).join('')}</table></div>`).join('')}
+    <td>${esc(i.iso?isoNum(i.iso):'—')}</td>${showAudit?`<td>${i._a?fmtDT(i._a).slice(0,10):''}</td>`:''}<td></td></tr>`).join('')}</table></div>`).join('')}
  </div>
  ${sign!==undefined?`<div class="sign">Провёл обход: ______________________ ${esc(sign)}<br>Ознакомлены: ______________________________________________<br>______________________________________________________________</div>`:''}
  <div class="foot">Сформировано ${new Date().toLocaleString('ru-RU')}</div></div>`;
@@ -806,8 +876,8 @@ function buildXlsx(sheets){
 async function excelExport(scope){
  let items=[],title,fname;
  if(scope==='audit'){items=cur.items.map((i,k)=>({...i,_n:k+1,_a:cur.date}));title='Обход '+fmtDT(cur.date)+(cur.auditor?' · '+cur.auditor:'');fname='Контроль_обход_'+cur.date.slice(0,10)}
- else if(scope==='open'){items=lastIssues;title='Открытые замечания на '+new Date().toLocaleDateString('ru-RU')+(fResp?' · '+fResp:'')+(fZone?' · '+fZone:'');
-  fname='Контроль_открытые_'+(fResp?fResp.replace(/[\s.]+/g,'_')+'_':'')+today()}
+ else if(scope==='open'){items=lastIssues;title='Замечания на '+new Date().toLocaleDateString('ru-RU')+(fResp?' · '+fResp:'')+(fZone?' · '+fZone:'');
+  fname='Контроль_замечания_'+(fResp?fResp.replace(/[\s.]+/g,'_')+'_':'')+today()}
  else{(await getAll()).sort((a,b)=>a.date.localeCompare(b.date)).forEach(a=>a.items.forEach((i,k)=>items.push({...i,_n:k+1,_a:a.date})));
   title='Все обходы';fname='Контроль_все_обходы_'+today()}
  if(!items.length)return alert('Нет замечаний для выгрузки');
@@ -815,7 +885,32 @@ async function excelExport(scope){
  const sub=title+(S.company?' · '+S.company:'')+' · сформировано '+new Date().toLocaleString('ru-RU');
  const head=a=>a.map(h=>({v:h,s:1}));
  /* Лист: все замечания */
- const rows=[[{v:'Контроль устранения замечаний',s:6}],[{v:sub}],[],head(['№','Дата обхода','Зона','Место','Что не так','Ответственный','Приоритет','Срок','Статус','Дата устранения','Просрочка, дн.','Комментарий по устранению','Отметка контроля'])];
+ const rows=[[{v:'Замечания обходов производства',s:6}],[{v:sub}],[],head(['№','Дата обхода','Зона','Место','Что не так','Пункт ISO 9001','Ответственный','Отметка о выполнении','Комментарий'])];
+ const heights=[24,0,0,32];
+ items.forEach(i=>{
+  rows.push([{v:i._n,s:4},{d:i._a?i._a.slice(0,10):'',s:3},{v:i.zone||'Без зоны',s:2},{v:i.place||'',s:2},{v:i.desc||'',s:2},{v:i.iso||'',s:2},{v:respText(i)||'Не назначен',s:2},{v:'',s:2},{v:'',s:2}]);
+  const lines=Math.max(1,...[[i.desc,45],[i.place,22],[i.iso,30],[i.zone,18],[respText(i),24]].map(([t,w])=>{t=String(t||'');return t.split('\n').reduce((s,l)=>s+Math.max(1,Math.ceil(l.length/(w*1.1))),0)}));
+  heights.push(Math.min(15*lines+3,200));
+ });
+ const shItems={name:SN,rows,heights,cols:[6,12,20,22,45,32,26,20,25],freeze:4,filter:`A4:I${last}`,merge:['A1:I1','A2:I2']};
+ const {zones,people,isos}=summarize(items);
+ const pr=[[{v:'Кому что делать — по ответственным',s:6}],[{v:sub}],[],head(['Ответственный','Замечаний'])];
+ people.forEach((p,k)=>{const r=first+k;pr.push([{v:p.name,s:7},{f:`COUNTIF(${R}$G:$G,"*"&$A${r}&"*")`,s:4}])});
+ const pt=first+people.length;
+ pr.push([{v:'ИТОГО (замечание с двумя ответственными считается у обоих)',s:7},{f:`SUM(B${first}:B${pt-1})`,s:9}]);
+ const shPeople={name:'По ответственным',rows:pr,heights:[24,0,0,32],cols:[45,12],freeze:4,merge:['A1:B1','A2:B2']};
+ const zr=[[{v:'Градация по зонам',s:6}],[{v:sub}],[],head(['Зона','Оценка','Замечаний'])];
+ zones.forEach((z,k)=>{const r=first+k;zr.push([{v:z.name,s:7},{f:`IF(C${r}>=5,"Критично",IF(C${r}>=2,"Требует внимания","Единичное"))`,s:8},{f:`COUNTIF(${R}$C:$C,$A${r})`,s:4}])});
+ const zt=first+zones.length,zl=zt-1;
+ zr.push([{v:'ИТОГО',s:7},{v:'',s:7},{f:`SUM(C${first}:C${zl})`,s:9}]);
+ const shZones={name:'По зонам',rows:zr,heights:[24,0,0,32],cols:[34,20,12],freeze:4,merge:['A1:C1','A2:C2'],
+  cf:[[`B${first}:B${zl}`,[[1,`$B${first}="Критично"`],[2,`$B${first}="Требует внимания"`],[0,`$B${first}="Единичное"`]]]]};
+ const ir=[[{v:'Нарушения по пунктам ISO 9001',s:6}],[{v:sub}],[],head(['Пункт ISO 9001','Замечаний'])];
+ isos.forEach((x,k)=>{const r=first+k;ir.push([{v:x.name,s:7},x.name==='Не указан'?{f:`COUNTBLANK(${R}F${first}:F${last})`,s:4}:{f:`COUNTIF(${R}$F:$F,$A${r})`,s:4}])});
+ const itt=first+isos.length;
+ ir.push([{v:'ИТОГО',s:7},{f:`SUM(B${first}:B${itt-1})`,s:9}]);
+ const shIso={name:'По пунктам ISO',rows:ir,heights:[24,0,0,32],cols:[62,12],freeze:4,merge:['A1:B1','A2:B2']};
+ if(0){const rows=[[{v:'Контроль устранения замечаний',s:6}],[{v:sub}],[],head(['№','Дата обхода','Зона','Место','Что не так','Ответственный','Приоритет','Срок','Статус','Дата устранения','Просрочка, дн.','Комментарий по устранению','Отметка контроля'])];
  const heights=[24,0,0,32];
  items.forEach((i,k)=>{const r=first+k;
   rows.push([{v:i._n,s:4},{d:i._a?i._a.slice(0,10):'',s:3},{v:i.zone||'Без зоны',s:2},{v:i.place||'',s:2},{v:i.desc||'',s:2},{v:respText(i)||'Не назначен',s:2},
@@ -847,7 +942,8 @@ async function excelExport(scope){
  zr.push([{v:'ИТОГО',s:7},{v:'',s:7},...['C','D','E','F','G'].map(c=>({f:`SUM(${c}${first}:${c}${zl})`,s:9})),{f:`IF(C${zt}=0,"",G${zt}/C${zt})`,s:10}]);
  const shZones={name:'По зонам',rows:zr,heights:[24,0,0,32],cols:[30,18,9,10,12,12,11,14],freeze:4,merge:['A1:H1','A2:H2'],
   cf:[[`B${first}:B${zl}`,[[1,`$B${first}="Критично"`],[2,`$B${first}="Требует внимания"`],[0,`$B${first}="В норме"`]]],[`F${first}:F${zt}`,[[1,`F${first}>0`]]]]};
- const blob=buildXlsx([shPeople,shZones,shItems]);
+ }
+ const blob=buildXlsx([shPeople,shZones,shIso,shItems]);
  if(scope==='audit')markExp('xlsx');
  return saveFile(blob,fname+'.xlsx');
 }
@@ -1015,6 +1111,11 @@ function importBackup(){
    if(!S.people.includes(r))S.people.push(r);
   });
   S.addZones6=true;await setKV('settings',S);
+ }
+ if(!S.addPlaces7){
+  S.places=S.places||[];
+  ['ССиМ','СГП'].forEach(n=>{if(!S.places.some(p=>p.zone===n&&p.name===n))S.places.push({zone:n,name:n})});
+  S.addPlaces7=true;await setKV('settings',S);
  }
  navigator.storage?.persist?.();
  window.addEventListener('afterprint',()=>document.title='Обходы производства');
